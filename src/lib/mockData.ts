@@ -1,6 +1,6 @@
 // ============================================================================
-// Supreme Fusion — Rich mock data for demo mode
-// Fuses Predictly's 12-market dataset with Supreme Fusion's dual-currency fields
+// Predictly — Rich mock data for demo mode
+// Fuses Predictly's 12-market dataset with Predictly's dual-currency fields
 // ============================================================================
 
 import type {
@@ -586,7 +586,7 @@ export const mockAISwarmStatus: AISwarmStatus = {
 
 export const mockUser: User = {
   id: 'u1',
-  email: 'trader@supremefusion.io',
+  email: 'trader@predictly.io',
   username: 'TraderPro',
   avatar_url: undefined,
   gold_balance: 50_000,

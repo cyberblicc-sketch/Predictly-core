@@ -19,10 +19,10 @@ export default function AuthLayout({
         {/* Logo */}
         <Link href="/" className="mb-8 inline-flex items-center gap-2">
           <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white">
-            SF
+            PR
           </div>
           <span className="gradient-text font-semibold text-xl tracking-tight">
-            Supreme Fusion
+            Predictly
           </span>
         </Link>
 

@@ -80,11 +80,11 @@ export function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
               <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white text-sm">
-                SF
+                PR
                 <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-yes" />
               </div>
               <span className="font-semibold text-lg tracking-tight hidden sm:inline">
-                Supreme Fusion
+                Predictly
               </span>
             </Link>
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // ============================================================================
-// Supreme Fusion — Route protection middleware
+// Predictly — Route protection middleware
 // ============================================================================
 
 // Route classification

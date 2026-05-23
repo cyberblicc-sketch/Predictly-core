@@ -32,7 +32,7 @@ export default function SignInPage() {
     // Demo: simulate sign-in with a toast and redirect
     setTimeout(() => {
       toast.success('Welcome back!', {
-        description: 'Successfully signed in to Supreme Fusion.',
+        description: 'Successfully signed in to Predictly.',
       })
       router.push('/dashboard')
     }, 800)
@@ -43,7 +43,7 @@ export default function SignInPage() {
       <CardHeader className="text-center pb-2">
         <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
         <CardDescription className="text-fg-muted">
-          Sign in to your Supreme Fusion account
+          Sign in to your Predictly account
         </CardDescription>
       </CardHeader>
 

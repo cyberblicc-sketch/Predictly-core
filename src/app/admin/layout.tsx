@@ -95,7 +95,7 @@ export default function AdminLayout({
             </div>
             <div>
               <div className="font-bold text-sm tracking-tight text-fg">Admin Panel</div>
-              <div className="text-2xs text-fg-muted">Supreme Fusion</div>
+              <div className="text-2xs text-fg-muted">Predictly</div>
             </div>
           </Link>
         </div>

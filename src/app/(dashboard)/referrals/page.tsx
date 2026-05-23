@@ -7,8 +7,8 @@ import {
 } from 'lucide-react'
 import { cn, formatDate, formatUSD } from '@/lib/utils'
 
-const REFERRAL_CODE = 'SUPREME-TRADERPRO-2024'
-const REFERRAL_LINK = 'https://supremefusion.io/r/TRADERPRO'
+const REFERRAL_CODE = 'PREDICTLY-TRADERPRO-2024'
+const REFERRAL_LINK = 'https://predictly.io/r/TRADERPRO'
 
 const MOCK_REFERRALS = [
   { id: 'r1', username: 'CryptoNewbie', date: '2026-03-08T10:00:00Z', status: 'COMPLETED' as const, reward: 50 },
@@ -50,7 +50,7 @@ export default function ReferralsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Referrals</h1>
-        <p className="text-sm text-fg-muted mt-1">Earn Sweeps Coins by inviting friends to Supreme Fusion</p>
+        <p className="text-sm text-fg-muted mt-1">Earn Sweeps Coins by inviting friends to Predictly</p>
       </div>
 
       {/* Referral code + share link */}

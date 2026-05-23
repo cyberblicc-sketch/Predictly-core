@@ -1,5 +1,5 @@
 // ============================================================================
-// Supreme Fusion — Server-side auth helpers using Supabase
+// Predictly — Server-side auth helpers using Supabase
 // All functions are designed for use in Server Components / Route Handlers
 // ============================================================================
 

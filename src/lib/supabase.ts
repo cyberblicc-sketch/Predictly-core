@@ -1,5 +1,5 @@
 // ============================================================================
-// Supreme Fusion — Supabase client with RPC helpers
+// Predictly — Supabase client with RPC helpers
 // Wraps all Supabase calls in try/catch with fallback to mock data
 // ============================================================================
 

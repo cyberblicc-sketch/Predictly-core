@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">Leaderboard</h1>
-          <p className="text-sm text-fg-muted mt-0.5">Top traders on Supreme Fusion</p>
+          <p className="text-sm text-fg-muted mt-0.5">Top traders on Predictly</p>
         </div>
       </div>
 

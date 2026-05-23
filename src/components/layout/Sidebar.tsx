@@ -40,7 +40,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="p-4 border-b border-border">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white text-sm shrink-0">
-            SF
+            PR
           </div>
           <AnimatePresence>
             {!collapsed && (
@@ -51,7 +51,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 transition={{ duration: 0.2 }}
                 className="font-bold text-lg tracking-tight overflow-hidden whitespace-nowrap"
               >
-                Supreme Fusion
+                Predictly
               </motion.span>
             )}
           </AnimatePresence>

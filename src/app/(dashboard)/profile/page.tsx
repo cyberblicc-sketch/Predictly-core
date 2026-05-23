@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const user = mockUser
 
   const copyReferral = () => {
-    navigator.clipboard.writeText('https://supremefusion.io/r/TRADERPRO')
+    navigator.clipboard.writeText('https://predictly.io/r/TRADERPRO')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -91,7 +91,7 @@ export default function ProfilePage() {
                   <Twitter className="h-3.5 w-3.5" /> @traderpro
                 </span>
                 <span className="flex items-center gap-1 hover:text-fg cursor-pointer transition-colors">
-                  <Globe className="h-3.5 w-3.5" /> supremefusion.io
+                  <Globe className="h-3.5 w-3.5" /> predictly.io
                 </span>
                 <span className="flex items-center gap-1 font-mono">
                   <Wallet className="h-3.5 w-3.5" /> 0x7f3...a92d
@@ -257,7 +257,7 @@ export default function ProfilePage() {
               <p className="text-2xs text-fg-muted mb-3">Share your link and earn 50 SC for each friend who joins</p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 px-3 py-2 rounded-lg bg-bg border border-border text-2xs font-mono text-brand truncate">
-                  supremefusion.io/r/TRADERPRO
+                  predictly.io/r/TRADERPRO
                 </code>
                 <button
                   onClick={copyReferral}

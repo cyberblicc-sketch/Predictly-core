@@ -3,7 +3,7 @@ import { mockUser } from '@/lib/mockData'
 
 // In-memory mock users for demo
 const mockUsers = [
-  { ...mockUser, id: 'u1', username: 'TraderPro', email: 'trader@supremefusion.io', gold_balance: 50000, sweeps_balance: 2500, kyc_status: 'approved' as const, user_tier: 'gold' as const },
+  { ...mockUser, id: 'u1', username: 'TraderPro', email: 'trader@predictly.io', gold_balance: 50000, sweeps_balance: 2500, kyc_status: 'approved' as const, user_tier: 'gold' as const },
   { id: 'u2', email: 'whale@example.com', username: 'whale.eth', avatar_url: undefined, gold_balance: 120000, sweeps_balance: 8400, kyc_status: 'approved' as const, user_tier: 'diamond' as const, is_admin: false, created_at: '2025-02-10T10:00:00Z' },
   { id: 'u3', email: 'newbie@example.com', username: 'newkid', avatar_url: undefined, gold_balance: 1200, sweeps_balance: 75, kyc_status: 'pending' as const, user_tier: 'starter' as const, is_admin: false, created_at: '2026-01-15T14:00:00Z' },
   { id: 'u4', email: 'short@example.com', username: 'shortking', avatar_url: undefined, gold_balance: 8500, sweeps_balance: 320, kyc_status: 'approved' as const, user_tier: 'silver' as const, is_admin: false, created_at: '2025-06-20T08:00:00Z' },

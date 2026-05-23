@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminSession } from '@/lib/adminAuth'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'supreme-admin-2026'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'predictly-admin-2026'
 
 export async function POST(request: Request) {
   try {

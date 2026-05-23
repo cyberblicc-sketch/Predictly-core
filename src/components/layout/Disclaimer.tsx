@@ -34,7 +34,7 @@ export function Disclaimer({ compact = false, className }: DisclaimerProps) {
                 </p>
                 <div className="text-xs text-fg-subtle leading-relaxed space-y-2">
                   <p>
-                    Supreme Fusion is a dual-currency prediction market platform designed for{' '}
+                    Predictly is a dual-currency prediction market platform designed for{' '}
                     <strong className="text-fg-muted">entertainment purposes only</strong>. Gold Coins (GC)
                     are virtual currency with no monetary value and cannot be redeemed for real money or prizes.
                   </p>

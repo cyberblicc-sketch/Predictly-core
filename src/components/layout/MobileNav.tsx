@@ -42,9 +42,9 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         <SheetHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white text-sm">
-              SF
+              PR
             </div>
-            <SheetTitle className="font-bold text-lg">Supreme Fusion</SheetTitle>
+            <SheetTitle className="font-bold text-lg">Predictly</SheetTitle>
           </div>
           <SheetDescription className="sr-only">Navigation menu</SheetDescription>
         </SheetHeader>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 // In-memory config for demo purposes
 let siteConfig = {
-  siteName: 'Supreme Fusion',
+  siteName: 'Predictly',
   maintenanceMode: false,
   announcementBanner: '',
   houseFee: 0.02,

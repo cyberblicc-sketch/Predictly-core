@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold text-fg">Admin Access</h1>
-            <p className="text-sm text-fg-muted mt-1">Supreme Fusion Administration</p>
+            <p className="text-sm text-fg-muted mt-1">Predictly Administration</p>
           </div>
         </div>
 
@@ -122,7 +122,7 @@ export default function AdminLoginPage() {
               </Button>
 
               <p className="text-2xs text-fg-subtle text-center mt-4">
-                Demo password: <span className="text-fg-muted font-mono">supreme-admin-2026</span>
+                Demo password: <span className="text-fg-muted font-mono">predictly-admin-2026</span>
               </p>
             </form>
           </CardContent>

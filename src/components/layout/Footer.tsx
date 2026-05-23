@@ -57,9 +57,9 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center text-white text-sm font-bold">
-                SF
+                PR
               </div>
-              <span className="gradient-text font-semibold tracking-tight">Supreme Fusion</span>
+              <span className="gradient-text font-semibold tracking-tight">Predictly</span>
             </div>
             <p className="text-sm text-fg-muted max-w-xs leading-relaxed mb-4">
               The world&apos;s information network. Trade on real-world events
@@ -105,7 +105,7 @@ export function Footer() {
         {/* Disclaimer */}
         <div className="mt-8 rounded-lg bg-bg-subtle border border-border p-4">
           <p className="text-xs text-fg-subtle leading-relaxed">
-            Supreme Fusion is a dual-currency prediction market platform for entertainment purposes.
+            Predictly is a dual-currency prediction market platform for entertainment purposes.
             Gold Coins (GC) have no monetary value and cannot be redeemed for prizes.
             Sweeps Coins (SC) can be redeemed for real prizes after completing KYC verification.
             Must be 18+ to participate. Void where prohibited. Alternative Method of Entry (AMOE) available.
@@ -116,7 +116,7 @@ export function Footer() {
         {/* Bottom row */}
         <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 justify-between items-center">
           <p className="text-xs text-fg-subtle">
-            &copy; {new Date().getFullYear()} Supreme Fusion. All rights reserved. Dual-currency prediction markets.
+            &copy; {new Date().getFullYear()} Predictly. All rights reserved. Dual-currency prediction markets.
           </p>
           <div className="flex gap-4 text-xs text-fg-subtle">
             <Link href="/terms" className="hover:text-fg transition-colors">Terms of Service</Link>

@@ -52,7 +52,7 @@ export default function SignUpPage() {
     // Demo: simulate sign-up with a toast and redirect
     setTimeout(() => {
       toast.success('Account created!', {
-        description: 'Welcome to Supreme Fusion! Redirecting to dashboard...',
+        description: 'Welcome to Predictly! Redirecting to dashboard...',
       })
       router.push('/dashboard')
     }, 1000)
@@ -63,7 +63,7 @@ export default function SignUpPage() {
       <CardHeader className="text-center pb-2">
         <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
         <CardDescription className="text-fg-muted">
-          Join Supreme Fusion and start trading predictions
+          Join Predictly and start trading predictions
         </CardDescription>
       </CardHeader>
 

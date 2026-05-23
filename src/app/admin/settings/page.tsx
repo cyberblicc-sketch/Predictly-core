@@ -83,7 +83,7 @@ export default function AdminSettingsPage() {
     kycProvider: 'stripe',
     kycAutoApprove: false,
     kycRequiredDocuments: ['government_id', 'selfie', 'proof_of_address'],
-    siteName: 'Supreme Fusion',
+    siteName: 'Predictly',
     maintenanceMode: false,
     announcementBanner: '',
   })

@@ -515,3 +515,70 @@ model AiDailySpending {
   @@unique([agentName, date])
   @@map("ai_daily_spending")
 }
+
+model PromoCode {
+  id                 String    @id @default(uuid())
+  code               String    @unique
+  description        String?
+  discount_type      String    // "PERCENTAGE" or "FIXED_SC" or "FIXED_GC"
+  discount_value     Int
+  max_redemptions    Int       @default(1)
+  current_redemptions Int      @default(0)
+  expires_at         DateTime?
+  is_active          Boolean   @default(true)
+  created_by         String?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@map("promo_codes")
+}
+
+model PromoRedemption {
+  id              String   @id @default(uuid())
+  user_id         String
+  promo_code_id   String
+  code            String
+  discount_type   String
+  discount_value  Int
+  redeemed_at     DateTime @default(now())
+
+  @@unique([user_id, promo_code_id])
+  @@map("promo_redemptions")
+}
+
+model Watchlist {
+  id         String   @id @default(uuid())
+  user_id    String
+  market_id  String
+  created_at DateTime @default(now())
+
+  @@unique([user_id, market_id])
+  @@map("watchlist")
+}
+
+model AuthLog {
+  id          String   @id @default(uuid())
+  user_id     String?
+  email       String?
+  action      String   // "SIGN_IN", "SIGN_UP", "SIGN_OUT", "PASSWORD_RESET", "OAUTH", "FAILED_LOGIN"
+  ip_address  String?
+  user_agent  String?
+  details     String?
+  created_at  DateTime @default(now())
+
+  @@map("auth_logs")
+}
+
+model ContactMessage {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  subject    String
+  message    String
+  category   String   @default("general") // "general", "support", "billing", "bug", "feedback"
+  status     String   @default("new") // "new", "read", "replied", "closed"
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("contact_messages")
+}

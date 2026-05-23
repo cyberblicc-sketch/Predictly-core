@@ -37,7 +37,7 @@ export default function PortfolioPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `supreme-fusion-portfolio-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `predictly-portfolio-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }

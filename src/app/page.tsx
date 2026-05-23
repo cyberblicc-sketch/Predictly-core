@@ -99,7 +99,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
-              <span className="gradient-text">Supreme Fusion</span>
+              <span className="gradient-text">Predictly</span>
               <br />
               Prediction Market
             </h1>
@@ -336,7 +336,7 @@ export default function HomePage() {
                 Recent <span className="gradient-text">Activity</span>
               </h2>
               <p className="text-fg-muted text-sm mb-6">
-                See what&apos;s happening right now on Supreme Fusion.
+                See what&apos;s happening right now on Predictly.
               </p>
               <ActivityFeed limit={4} />
             </div>

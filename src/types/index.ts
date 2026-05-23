@@ -1,6 +1,6 @@
 // ============================================================================
-// Supreme Fusion — TypeScript interfaces
-// Fuses Predictly's UI types with Supreme Fusion's backend types
+// Predictly — TypeScript interfaces
+// Fuses Predictly's UI types with Predictly's backend types
 // ============================================================================
 
 // --- Categories ---

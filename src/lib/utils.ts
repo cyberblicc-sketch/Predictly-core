@@ -5,16 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-/** Format a number as compact USD ($1.2K, $45.7M). */
+/** Format a number as compact USD ($1.2K, $45.7M). Uses deterministic formatting to avoid SSR/client hydration mismatches. */
 export function formatUSD(amount: number, opts: { compact?: boolean } = {}) {
   const { compact = true } = opts
   if (compact) {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(amount)
+    const abs = Math.abs(amount)
+    const sign = amount < 0 ? '-' : ''
+    if (abs >= 1_000_000_000) return `${sign}$${(abs / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`
+    if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+    if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(1).replace(/\.0$/, '')}K`
+    return `${sign}$${abs.toFixed(0)}`
   }
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -34,12 +34,13 @@ export function formatCents(p: number) {
   return `${Math.round(p * 100)}¢`
 }
 
-/** Compact number formatter (12,345 → 12.3K). */
+/** Compact number formatter (12,345 → 12.3K). Uses deterministic formatting to avoid SSR/client hydration mismatches. */
 export function formatCompact(n: number) {
-  return new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(n)
+  const abs = Math.abs(n)
+  if (abs >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`
+  if (abs >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+  if (abs >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}K`
+  return n.toFixed(0)
 }
 
 /** "Closes in 3d", "Closes in 2h", etc. */
@@ -69,7 +70,7 @@ export function formatCurrency(amount: number, currency: 'GC' | 'SC' | 'USD' = '
   return formatUSD(amount, { compact: false })
 }
 
-// ── Supreme Fusion Utility Functions ──────────────────────────────────────────
+// ── Predictly Utility Functions ──────────────────────────────────────────
 
 /** Calculate P&L from entry and current prices */
 export function calculatePnl(

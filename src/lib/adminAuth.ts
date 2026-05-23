@@ -1,11 +1,11 @@
 // ============================================================================
-// Supreme Fusion — Admin session verification
+// Predictly — Admin session verification
 // Uses a simple cookie-based admin session with ADMIN_PASSWORD env var
 // ============================================================================
 
 import { cookies } from 'next/headers'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'supreme-admin-2026'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'predictly-admin-2026'
 const ADMIN_SESSION_COOKIE = 'admin_session'
 const ADMIN_SESSION_MAX_AGE = 60 * 60 * 8 // 8 hours
 

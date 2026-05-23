@@ -1,5 +1,5 @@
 // ============================================================================
-// Supreme Fusion — AI Swarm dashboard helpers
+// Predictly — AI Swarm dashboard helpers
 // AI agents that autonomously trade on prediction markets for demo liquidity
 // ============================================================================
 

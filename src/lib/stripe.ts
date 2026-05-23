@@ -1,5 +1,5 @@
 // ============================================================================
-// Supreme Fusion — Stripe integration
+// Predictly — Stripe integration
 // GC purchases, identity verification, redemption payouts, webhooks
 // ============================================================================
 
@@ -76,7 +76,7 @@ export async function createCheckoutSession(
             unit_amount: pkg.price,
             product_data: {
               name: `${pkg.gc.toLocaleString()} Gold Coins + ${pkg.sc_bonus} Sweeps Coins`,
-              description: `Supreme Fusion ${packageId.charAt(0).toUpperCase() + packageId.slice(1)} package`,
+              description: `Predictly ${packageId.charAt(0).toUpperCase() + packageId.slice(1)} package`,
               metadata: {
                 package_id: packageId,
                 gc_amount: String(pkg.gc),

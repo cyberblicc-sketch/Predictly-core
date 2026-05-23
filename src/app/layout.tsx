@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Supreme Fusion — Dual-Currency Prediction Markets",
+  title: "Predictly — Dual-Currency Prediction Markets",
   description: "Trade on real-world events with dual-currency prediction markets. Politics, crypto, sports, tech, and more.",
-  keywords: ["prediction markets", "Supreme Fusion", "dual currency", "Gold Coins", "Sweeps Coins", "trading"],
+  keywords: ["prediction markets", "Predictly", "dual currency", "Gold Coins", "Sweeps Coins", "trading"],
   icons: {
     icon: "/logo.svg",
   },
