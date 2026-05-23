@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    background: #0A0B0F;
+    color: #F5F7FA;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Subtle radial spotlight on the body — gives the page a centered focus
+     similar to Polymarket's hero glow. */
+  body {
+    background-image:
+      radial-gradient(1200px 600px at 50% -200px, rgba(99,102,241,0.08), transparent 60%),
+      radial-gradient(800px 400px at 100% 100%, rgba(0,210,132,0.04), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  ::selection { background: rgba(99,102,241,0.35); color: #fff; }
+
+  /* Scrollbar — thin, dark, unobtrusive. */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #2A3040; border-radius: 8px; border: 2px solid #0A0B0F;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #3A4257; }
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(135deg, #6366F1 0%, #00D284 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Glassy navbar treatment used on header. */
+  .glass {
+    background: rgba(10, 11, 15, 0.72);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+  }
+
+  /* "Live" pulsing dot used next to active markets. */
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 999px;
+    background: #00D284;
+    box-shadow: 0 0 0 0 rgba(0,210,132,0.7);
+    animation: live-pulse 2s infinite;
+  }
+  @keyframes live-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0,210,132,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(0,210,132,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,210,132,0); }
+  }
+
+  /* Shimmer for skeletons. */
+  .skeleton {
+    background: linear-gradient(90deg, #171923 0%, #1E2230 50%, #171923 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}

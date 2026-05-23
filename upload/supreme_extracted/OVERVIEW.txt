@@ -1,0 +1,555 @@
+================================================================================
+SUPREME FUSION PREDICTION MARKET — COMPLETE SOURCE CODE ARCHIVE
+================================================================================
+
+Project: Supreme Fusion Prediction Market
+Version: 1.0 Production-Grade
+Files: 102 source files (~1MB compressed)
+Stack: Next.js 16 + Supabase + Stripe + Groq AI
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+Supreme Fusion is a production-ready prediction market platform built for a
+solo developer. It features dual-currency (Gold Coins + Sweeps Coins), atomic
+PostgreSQL transactions, AI trading agents, KYC verification, referral system,
+and a full admin dashboard.
+
+KEY FEATURES:
+- Dual Currency System: GC (purchased) + SC (free promotional)
+- LMSR Market Making: automated liquidity with 3% total fee (2% + 1%)
+- Atomic Transactions: RPC functions with row locking prevent double-spend
+- AI Trading Swarm: 4 agents (Momentum, Contrarian, Arbitrage, Sentiment)
+- KYC via Stripe Identity: only at redemption (min 50-60 SC)
+- Referral System: +20 SC + 20,000 GC per depositing referral
+- Fraud Reporting: user-submitted reports on any market
+- Social Sharing: Twitter, Telegram, Facebook share buttons
+- Admin Dashboard: full CRUD, audit logs, AI controls, dispute resolution
+- Leaderboard: global rankings by total winnings
+
+================================================================================
+2. FILE STRUCTURE
+================================================================================
+
+supreme-fusion/
+├── app/                          # Next.js App Router pages
+│   ├── page.tsx                  # Landing page (hero, markets, 1% profit)
+│   ├── layout.tsx                # Root layout
+│   ├── globals.css               # Global Tailwind styles
+│   ├── (auth)/                   # Auth route group
+│   │   ├── layout.tsx            # Auth layout
+│   │   ├── signin/page.tsx       # Sign-in page
+│   │   ├── signup/page.tsx       # Sign-up page
+│   │   └── callback/route.ts     # OAuth callback handler
+│   ├── (dashboard)/              # Protected user dashboard
+│   │   ├── layout.tsx            # Dashboard layout with sidebar
+│   │   ├── dashboard/page.tsx    # Main dashboard
+│   │   ├── markets/page.tsx      # Market browser
+│   │   ├── markets/[id]/page.tsx # Market detail + trade form
+│   │   ├── portfolio/page.tsx    # User positions + P&L
+│   │   ├── profile/page.tsx      # Profile edit + KYC
+│   │   ├── history/page.tsx      # Transaction history
+│   │   ├── referrals/page.tsx    # Referral links + rewards
+│   │   ├── leaderboard/page.tsx  # Global rankings
+│   │   └── kyc/page.tsx          # KYC verification flow
+│   ├── admin/                    # Admin panel
+│   │   ├── layout.tsx            # Admin layout with auth middleware
+│   │   ├── page.tsx              # Admin overview dashboard
+│   │   ├── login/page.tsx        # Admin login (password gate)
+│   │   ├── users/page.tsx        # User management (22KB)
+│   │   ├── markets/page.tsx      # Market management
+│   │   ├── disputes/page.tsx     # Fraud dispute resolution
+│   │   ├── logs/page.tsx         # Audit logs viewer
+│   │   └── settings/page.tsx     # AI config, fees, site settings
+│   └── api/                      # API routes
+│       ├── admin/                # Admin API (20 endpoints)
+│       │   ├── stats/route.ts
+│       │   ├── check/route.ts
+│       │   ├── login/route.ts
+│       │   ├── activity/route.ts
+│       │   ├── config/route.ts
+│       │   ├── ai-config/route.ts
+│       │   ├── ai-config/toggle/route.ts
+│       │   ├── users/route.ts
+│       │   ├── users/bulk/route.ts
+│       │   ├── users/[id]/transactions/route.ts
+│       │   ├── users/[id]/positions/route.ts
+│       │   ├── users/[id]/adjust-balance/route.ts
+│       │   ├── users/[id]/suspend/route.ts
+│       │   ├── users/[id]/kyc/route.ts
+│       │   ├── markets/route.ts
+│       │   ├── markets/[id]/resolve/route.ts
+│       │   ├── markets/[id]/suspend/route.ts
+│       │   ├── fraud-reports/route.ts
+│       │   └── fraud-reports/[id]/resolve/route.ts
+│       ├── fraud-report/route.ts # User fraud report submission
+│       └── webhooks/stripe/route.ts # Stripe webhook handler
+├── components/
+│   ├── market/
+│   │   ├── MarketCard.tsx        # Market card with share + fraud report
+│   │   └── ProbabilityChart.tsx  # Probability line chart (Recharts)
+│   ├── portfolio/
+│   │   └── PositionCard.tsx      # Position P&L card
+│   ├── trade/
+│   │   └── TradeForm.tsx         # YES/NO stake form with fee breakdown
+│   ├── layout/
+│   │   ├── Header.tsx            # Top navigation
+│   │   ├── Sidebar.tsx           # Dashboard sidebar
+│   │   ├── MobileNav.tsx         # Mobile navigation
+│   │   └── Disclaimer.tsx        # Legal disclaimer component
+│   └── ui/                       # shadcn/ui-style components
+│       ├── Button.tsx, Input.tsx, Label.tsx
+│       ├── Card.tsx, Badge.tsx, Separator.tsx
+│       ├── Modal.tsx, Toast.tsx, Toaster.tsx
+│       └── DropdownMenu.tsx
+├── lib/
+│   ├── auth.ts                   # Server-side auth helpers
+│   ├── supabase.ts               # Supabase client + RPC types
+│   ├── adminAuth.ts              # Admin session verification
+│   ├── stripe.ts                 # Stripe GC purchase + KYC + redemption
+│   ├── ai-swarm.ts               # Groq AI agent integration
+│   └── utils.ts                  # Utility functions
+├── supabase/
+│   ├── migrations/
+│   │   ├── 001_initial.sql       # Core schema (24KB)
+│   │   │                         # Tables: users, user_profiles, markets,
+│   │   │                         # positions, transactions, referrals,
+│   │   │                         # admin_logs, fraud_reports, ai_agent_trades,
+│   │   │                         # social_shares, leaderboard_cache
+│   │   ├── 002_ai_swarm.sql      # AI swarm tables + functions (6KB)
+│   │   │                         # Tables: ai_agent_trades, leaderboard_cache
+│   │   │                         # Functions: fetch_markets_for_agents(),
+│   │   │                         # get_agent_decision(), log_agent_trade()
+│   │   └── 003_rpc_functions_and_tables.sql # RPC functions (23KB)
+│   │                             # Tables: ai_swarm_config, site_config,
+│   │                             # purchases, admin_actions, disputes
+│   │                             # RPC: process_stake(), resolve_market(),
+│   │                             # apply_referral_reward(), redeem_kyc(),
+│   │                             # redeem_position(), update_market_probability(),
+│   │                             # create_user_with_referral()
+│   └── functions/                # Individual RPC SQL files
+│       ├── process_stake.sql
+│       ├── resolve_market.sql
+│       ├── apply_referral_reward.sql
+│       ├── redeem_kyc.sql
+│       ├── redeem_position.sql
+│       ├── update_market_probability.sql
+│       ├── create_user_with_referral.sql
+│       ├── ai-swarm-cron.sql
+│       ├── ai-user-seed.sql
+│       └── ai-swarm/
+│           ├── index.ts          # Edge Function handler
+│           ├── groq.ts           # Groq API client
+│           └── types.ts          # Agent decision types
+├── types/
+│   └── index.ts                  # TypeScript interfaces
+├── middleware.ts                 # Route protection (auth + admin)
+├── package.json
+├── tsconfig.json
+├── tailwind.config.ts
+├── next.config.ts
+├── next.config.js
+├── .env.example
+└── README.md
+
+================================================================================
+3. DATABASE SCHEMA (001_initial.sql)
+================================================================================
+
+CORE TABLES:
+- users: id, email, phone, username, auth_provider, kyc_status, sc_balance,
+         gold_balance, user_tier, created_at, updated_at
+- user_profiles: id, user_id, display_name, avatar_url, bio, portfolio_value,
+                 total_winnings, total_stake, win_rate, followers_count
+- markets: id, title, description, category, question, outcome_type, yes_pool,
+           no_pool, creator_id, status, resolved_outcome, resolution_source,
+           created_at, closes_at, resolves_at, trading_volume, current_probability,
+           house_fee_percentage, platform_fee_percentage, is_featured, tags
+- positions: id, user_id, market_id, side, amount, entry_price, current_value,
+             pnl, status, created_at, closed_at, resolved_payout
+- transactions: id, user_id, type, amount, currency, market_id, position_id,
+                related_user_id, status, metadata, created_at
+- referrals: id, referrer_id, referred_user_id, referral_code, status,
+             reward_sc, reward_gold, created_at, completed_at, deposit_amount
+- admin_logs: id, admin_id, action, target_user_id, target_market_id,
+              changes, reason, created_at
+- fraud_reports: id, reporter_id, reported_user_id, market_id, report_type,
+                 description, evidence_urls, status, resolution_notes,
+                 resolved_by, created_at, resolved_at
+- ai_agent_trades: id, agent_name, market_id, side, amount, reason, status,
+                   execution_price, created_at, executed_at
+- social_shares: id, user_id, market_id, position_id, platform, message,
+                 shared_at, shares_count
+- leaderboard_cache: id, user_id, rank, total_pnl, win_count, total_positions,
+                     win_rate, this_month_pnl, last_updated
+
+RLS POLICIES:
+- users: Users see own profile + public profiles (not balances/KYC)
+- positions: Users see own positions; public leaderboard is aggregated
+- transactions: Users see own; admins see all
+- admin_logs: Only admins
+- fraud_reports: Reporters and admins see their own/assigned
+
+================================================================================
+4. KEY RPC FUNCTIONS (003_rpc_functions_and_tables.sql)
+================================================================================
+
+process_stake(p_user_id, p_market_id, p_side, p_amount):
+- Validates SC balance >= stake amount
+- FOR UPDATE row lock on market (prevents race conditions)
+- Deducts SC from user, adds to YES or NO pool
+- Creates position record with entry_price from LMSR
+- Logs transaction as STAKE type
+- Returns position_id, entry_price, new probability
+
+resolve_market(p_market_id, p_outcome, p_resolution_source):
+- Validates market is open and not already resolved
+- FOR UPDATE lock on all positions for market
+- Calculates total pool (yes_pool + no_pool)
+- Distributes winning side pool to winning positions pro-rata
+- Records PAYOUT transactions for winners
+- Applies house_fee and platform_fee to platform ledger
+- Updates market status to resolved
+
+apply_referral_reward(p_referrer_id, p_referred_user_id, p_deposit_amount):
+- Validates referral exists and referred user made deposit
+- Credits +20 SC + 20,000 GC to referrer
+- Updates referral status to completed
+- Logs transaction as REFERRAL_REWARD type
+
+redeem_kyc(p_user_id, p_amount, p_method):
+- Validates user KYC status is verified
+- Validates amount >= 50 SC (gift card) or >= 60 SC (USD transfer)
+- Converts SC to USD at 1 SC = $0.01
+- Creates Stripe payout intent
+- Deducts SC from user balance
+- Logs transaction as KYC_REDEMPTION type
+
+update_market_probability():
+- Computes YES probability as: yes_pool / (yes_pool + no_pool)
+- Updates current_probability column on all open markets
+- Called by AI swarm tick or scheduled job
+
+redeem_position(p_position_id, p_user_id):
+- Allows early exit at current probability
+- Deducts 2% exit fee if position is profitable
+- Updates position status to closed
+- Logs transaction as STAKE (reversal) type
+
+================================================================================
+5. FEE STRUCTURE
+================================================================================
+
+| Fee Type          | Rate  | Applied When           |
+|--------------------|-------|------------------------|
+| Protocol Fee       |   2%  | Market resolution      |
+| Publisher Fee      |   1%  | Market resolution      |
+| Exit Fee           |   2%  | Early profitable exit  |
+| Redemption Min     |  50SC | Gift card redemption   |
+| Redemption Min     |  60SC | USD bank transfer      |
+
+Example trade (1000 SC stake):
+- You stake: 1,000 SC
+- House keeps: 20 SC (2%)
+- Platform keeps: 10 SC (1%)
+- Into pool: 970 SC
+- Entry cost: 0.97 per share
+
+================================================================================
+6. AI SWARM ARCHITECTURE
+================================================================================
+
+Model: Groq llama-3.3-70b-versatile (14k tokens/min free tier)
+
+Agent Types:
+- Momentum: Follows price trends (buy YES if trending up)
+- Contrarian: Bets against overreactions (profitable on overreaction)
+- Arbitrage: Exploits probability mismatches across markets
+- Sentiment: Analyzes Twitter/news for market sentiment
+
+Rate Limits:
+- Max 10 trades per 5-minute tick
+- Max 50,000 SC per agent per day
+- Confidence threshold: 0.7 minimum
+- Markets < 1 hour to close: skipped
+
+Safety:
+- Manual kill switch via ai_swarm_config.enabled flag
+- Daily loss limit per agent
+- All trades logged to ai_agent_trades table
+- Transparent: users can see all AI activity
+
+Execution Flow:
+1. pg_cron triggers ai-swarm-tick every 5 minutes
+2. Edge Function fetches open markets with recent activity
+3. For each market, Groq receives JSON analysis prompt
+4. Groq returns 4 agent decisions in structured format
+5. Trades executed atomically via process_stake() RPC
+6. All trades logged for transparency
+
+================================================================================
+7. AUTHENTICATION SYSTEM
+================================================================================
+
+OAuth Providers (via Supabase):
+- Email/password with recovery
+- Google OAuth
+- Apple Sign-In
+
+Phone OTP (optional):
+- 2FA at signup (Twilio)
+- Verify before first withdrawal
+
+Admin Auth:
+- Separate password gate at /admin/login
+- bcrypt comparison against ADMIN_PASSWORD_HASH env var
+- Session stored in admin_session cookie (24hr expiry)
+- Middleware checks cookie on all /admin/* routes
+
+JWT Claims:
+- user_id, email, role (user/admin)
+- Verified in Edge Functions via Supabase client
+
+================================================================================
+8. STRIPE INTEGRATION
+================================================================================
+
+Gold Coin Packages:
+- $5  → 1,000 GC
+- $10 → 2,500 GC (bonus 500 GC)
+- $25 → 7,000 GC (bonus 2,000 GC)
+- $50 → 15,000 GC (bonus 5,000 GC)
+- $100 → 35,000 GC (bonus 10,000 GC)
+
+KYC Verification (Stripe Identity):
+- Triggered only at redemption time
+- ~$10 per verification paid by platform
+- PII handled by Stripe; we store only status + document URL
+
+Redemption Flow:
+1. User requests redemption (min 50-60 SC)
+2. Stripe Identity SDK embedded on /auth/kyc-verify
+3. User captures government ID
+4. Stripe processes asynchronously
+5. Webhook received at /api/webhooks/stripe
+6. User kyc_status updated to 'verified'
+7. Redemption enabled
+
+================================================================================
+9. REFERRAL SYSTEM
+================================================================================
+
+Reward Structure:
+- Referrer receives: +20 SC + 20,000 GC
+- Referred user receives: +20 SC + 20,000 GC (via AMOE)
+
+Trigger: Referred user makes first deposit (any amount)
+
+Tracking:
+- referrals table with referrer_id, referred_user_id, referral_code
+- Referral code stored in localStorage after signup
+- Applied via /api/apply-referral endpoint
+
+Gamification:
+- Badge display: "5 referrals", "10 referrals", etc.
+- Leaderboard: Top referrers featured placement
+- Bonus tiers: Refer 10 = unlock multiplier
+
+================================================================================
+10. ADMIN DASHBOARD FEATURES
+================================================================================
+
+Access: /admin/login → password gate → session cookie
+
+Pages:
+- Overview: Total users, volume, active markets, recent activity
+- Users: Search, view balances, KYC status, suspend, adjust balances
+- Markets: Create, edit, resolve, suspend; view stats and history
+- Disputes: Fraud report queue, evidence viewer, resolution actions
+- Logs: Audit trail with filters (admin, action, date, target)
+- Settings: AI config, trading limits, fee management, KYC settings
+
+API Endpoints:
+- GET /api/admin/stats — platform metrics
+- GET/POST /api/admin/users — user management
+- POST /api/admin/users/[id]/adjust-balance — balance adjustment
+- POST /api/admin/users/[id]/suspend — suspend/unsuspend
+- POST /api/admin/users/[id]/kyc — approve/reject KYC
+- GET/POST /api/admin/markets — market management
+- POST /api/admin/markets/[id]/resolve — resolve market
+- POST /api/admin/markets/[id]/suspend — suspend market
+- GET /api/admin/fraud-reports — list reports
+- POST /api/admin/fraud-reports/[id]/resolve — resolve dispute
+- GET/POST /api/admin/ai-config — AI settings
+- POST /api/admin/ai-config/toggle — enable/disable agents
+- GET /api/admin/activity — audit logs
+
+================================================================================
+11. LANDING PAGE FEATURES
+================================================================================
+
+Sections:
+- Hero: Platform tagline, CTA buttons (Sign Up / Start Trading)
+- Stats: Total volume, active users, markets resolved
+- 1% Profit Opportunity: Cards with market predictions + disclaimer
+  (includes stock-related: AAPL, TSLA, NVDA predictions)
+- Featured Markets: Live market cards with current odds
+- How It Works: 3-step explainer (Sign up → Stake → Win)
+- Recent Winners: Leaderboard preview
+- Footer: Links, disclaimer, social icons
+
+Key UI Elements:
+- Fraud report button (🚩 icon) on every market card
+- Social share button (share icon) on every market card
+- "1% Profit Opportunity" section with serious market ideas
+- Stock ticker cards on landing page
+- Legal disclaimer on every page (layout component)
+
+================================================================================
+12. SETUP & DEPLOYMENT
+================================================================================
+
+Prerequisites:
+- Node.js 18+
+- Supabase account (free tier: 500MB Postgres, 50k MAU)
+- Stripe account (test mode for development)
+- Groq API key (free tier: 14k tokens/min)
+- Vercel account (free tier: 100GB bandwidth)
+
+Environment Variables:
+NEXT_PUBLIC_SUPABASE_URL=<supabase-project-url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+STRIPE_SECRET_KEY=<stripe-secret-key>
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=<stripe-publishable-key>
+STRIPE_WEBHOOK_SECRET=<webhook-secret>
+GROQ_API_KEY=<groq-api-key>
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+ADMIN_PASSWORD=<your-secure-password>
+# Generate with: node -e "console.log(require('bcrypt').hashSync(process.argv[1], 10))" <password>
+ADMIN_PASSWORD_HASH=<bcrypt-hash>
+
+Database Setup:
+1. Create Supabase project
+2. Run migrations in order via SQL Editor:
+   - 001_initial.sql
+   - 002_ai_swarm.sql
+   - 003_rpc_functions_and_tables.sql
+3. Or use: supabase db push
+
+Deployment:
+1. Push to GitHub → connect to Vercel → auto-deploy
+2. Or: vercel deploy --prod
+3. Set environment variables in Vercel dashboard
+
+Stripe Webhook:
+- Endpoint: https://yourdomain.com/api/webhooks/stripe
+- Events: checkout.session.completed, identity.verification_session.verified
+
+AI Agent Setup:
+1. Create AI agent user in Supabase (id: 00000000-0000-0000-0000-000000000001)
+2. Seed with 100,000 SC initial balance
+3. Configure ai_swarm_config table with agent settings
+4. Set GROQ_API_KEY env var
+
+================================================================================
+13. TESTING CHECKLIST
+================================================================================
+
+Auth:
+[ ] Email/password signup and signin
+[ ] Google OAuth flow
+[ ] Apple Sign-In flow
+[ ] Phone OTP verification
+[ ] Admin login with password
+
+Trading:
+[ ] Stake YES on a market
+[ ] Stake NO on a market
+[ ] View position in portfolio
+[ ] Early exit from position
+[ ] Market resolution and payout
+
+Referral:
+[ ] Generate referral code
+[ ] Friend signs up with code
+[ ] Friend deposits
+[ ] Both receive rewards
+
+KYC:
+[ ] Navigate to KYC page
+[ ] Complete Stripe Identity verification
+[ ] Redeem SC after KYC approval
+
+Admin:
+[ ] Create a new market
+[ ] Edit market details
+[ ] Resolve market with outcome
+[ ] Adjust user balance
+[ ] Suspend user account
+[ ] Review and resolve fraud report
+[ ] View audit logs
+[ ] Toggle AI agents on/off
+
+================================================================================
+14. SUCCESS METRICS (Post-Launch)
+================================================================================
+
+Week 1:   500 signups, 100 active traders
+Month 1:  2,000 MAU, $5,000 total volume
+Month 3:  10,000 MAU, $50,000 volume, 10% repeat rate
+Month 6:  Platform fees > infrastructure costs (profitability)
+Year 1:   100,000 MAU, industry recognition
+
+================================================================================
+15. KNOWN RISKS & MITIGATIONS
+================================================================================
+
+| Risk                    | Mitigation                                |
+|-------------------------|-------------------------------------------|
+| Double-spend in trades  | RPC with FOR UPDATE row locking           |
+| Market resolution fraud | Admin manual review + transparent source  |
+| Whale manipulation      | Volume spike detection in admin dashboard |
+| KYC data breach         | Stripe handles PII; we store only status  |
+| AI agent loss spiral    | Kill switch + daily loss limits           |
+| Referral gaming         | Cap rewards per user/day, IP deduplication|
+
+================================================================================
+16. TECHNOLOGY CHOICES & RATIONALE
+================================================================================
+
+Why Next.js 16 App Router?
+- Server Components for SEO + performance
+- Route groups for clean code organization
+- Edge runtime for global latency
+- TypeScript first-class support
+
+Why Supabase (not PlanetScale/Firebase)?
+- Free tier: 500MB Postgres, 50k MAU
+- Row Level Security built-in
+- Real-time subscriptions for live updates
+- Auth + Storage + Edge Functions in one platform
+
+Why Groq for AI?
+- Free tier: 14k tokens/min
+- Llama 3 70B competitive with GPT-3.5
+- Sub-second inference (fast for frequent ticks)
+
+Why Stripe Identity (not other KYC providers)?
+- Industry standard, well-documented
+- Handles PII compliance
+- Only pay when users redeem (not at signup)
+
+Why RPC > Edge Functions for core logic?
+- Atomic transactions (all-or-nothing)
+- Performance (runs in DB process)
+- RLS enforced transparently
+- Immutable audit trail
+
+================================================================================
+
+End of Overview Document
+For questions or support, refer to the inline code comments.
+All code is production-ready and follows best practices.
+
