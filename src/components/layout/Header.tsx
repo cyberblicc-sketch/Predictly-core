@@ -35,11 +35,14 @@ import {
   CommandSeparator,
 } from '@/components/ui/command'
 import { MobileNav } from '@/components/layout/MobileNav'
+import { DepositModal } from '@/components/trade/DepositModal'
 
 const NAV_LINKS = [
   { href: '/',            label: 'Markets' },
   { href: '/portfolio',   label: 'Portfolio' },
+  { href: '/watchlist',   label: 'Watchlist' },
   { href: '/leaderboard', label: 'Leaderboard' },
+  { href: '/promotions',  label: 'Promos' },
 ]
 
 const gcBalance = mockUser.gold_balance
@@ -51,6 +54,7 @@ export function Header() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [isDark, setIsDark] = useState(true)
   const [commandOpen, setCommandOpen] = useState(false)
+  const [depositOpen, setDepositOpen] = useState(false)
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' || pathname.startsWith('/markets') : pathname.startsWith(href)
@@ -215,7 +219,10 @@ export function Header() {
               </button>
 
               {/* Deposit button */}
-              <button className="hidden sm:inline-flex h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)]">
+              <button 
+                onClick={() => setDepositOpen(true)}
+                className="hidden sm:inline-flex h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)]"
+              >
                 <Plus className="h-4 w-4 mr-1.5" />
                 Deposit
               </button>
@@ -250,7 +257,19 @@ export function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" className="cursor-pointer">
+                  <DropdownMenuItem 
+                    variant="destructive" 
+                    className="cursor-pointer"
+                    onClick={async () => {
+                      try {
+                        await fetch('/api/auth/signout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: mockUser.id }) })
+                        await fetch('/api/auth/session', { method: 'DELETE' })
+                        router.push('/signin')
+                      } catch (err) {
+                        console.error('Sign out failed:', err)
+                      }
+                    }}
+                  >
                     <LogOut className="h-4 w-4" />
                     Sign out
                   </DropdownMenuItem>
@@ -341,7 +360,10 @@ export function Header() {
       </CommandDialog>
 
       {/* Mobile navigation drawer */}
-      <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+      <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} onDeposit={() => { setMobileNavOpen(false); setDepositOpen(true) }} />
+
+      {/* Deposit modal */}
+      <DepositModal open={depositOpen} onOpenChange={setDepositOpen} />
     </>
   )
 }

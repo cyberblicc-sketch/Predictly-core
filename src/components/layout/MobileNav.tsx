@@ -7,6 +7,7 @@ import { mockUser } from '@/lib/mockData'
 import {
   LayoutDashboard, TrendingUp, Briefcase, User, Trophy,
   Gift, History, Shield, Wallet, Coins, Gem, Crown, Plus,
+  BookmarkPlus, Tag,
 } from 'lucide-react'
 import {
   Sheet,
@@ -19,20 +20,23 @@ import {
 interface MobileNavProps {
   open: boolean
   onClose: () => void
+  onDeposit?: () => void
 }
 
 const navItems = [
   { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/markets',    icon: TrendingUp,      label: 'Markets' },
   { href: '/portfolio',  icon: Briefcase,       label: 'Portfolio' },
+  { href: '/watchlist',  icon: BookmarkPlus,    label: 'Watchlist' },
   { href: '/leaderboard',icon: Trophy,          label: 'Leaderboard' },
+  { href: '/promotions', icon: Tag,             label: 'Promotions' },
   { href: '/referrals',  icon: Gift,            label: 'Referrals' },
   { href: '/history',    icon: History,         label: 'History' },
   { href: '/profile',    icon: User,            label: 'Profile' },
   { href: '/kyc',        icon: Shield,          label: 'KYC' },
 ]
 
-export function MobileNav({ open, onClose }: MobileNavProps) {
+export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
   const pathname = usePathname()
 
   return (
@@ -112,7 +116,10 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
 
         {/* Deposit button at bottom */}
         <div className="p-4 border-t border-border">
-          <button className="w-full h-11 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] flex items-center justify-center gap-2">
+          <button 
+            onClick={onDeposit}
+            className="w-full h-11 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] flex items-center justify-center gap-2"
+          >
             <Plus className="h-4 w-4" />
             Deposit
           </button>

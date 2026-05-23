@@ -5,38 +5,38 @@ const FOOTER_COLUMNS = [
   {
     title: 'Markets',
     links: [
+      { label: 'All Markets', href: '/markets' },
       { label: 'Politics', href: '/markets?category=Politics' },
       { label: 'Crypto', href: '/markets?category=Crypto' },
       { label: 'Sports', href: '/markets?category=Sports' },
       { label: 'Tech', href: '/markets?category=Tech' },
-      { label: 'Economics', href: '/markets?category=Economics' },
     ],
   },
   {
     title: 'Platform',
     links: [
-      { label: 'How it works', href: '/how-it-works' },
-      { label: 'Fees', href: '/fees' },
-      { label: 'API', href: '/api' },
-      { label: 'Resolution sources', href: '/resolution' },
+      { label: 'How it works', href: '/#how-it-works' },
+      { label: 'Promotions', href: '/promotions' },
+      { label: 'Leaderboard', href: '/leaderboard' },
+      { label: 'Referrals', href: '/referrals' },
     ],
   },
   {
     title: 'Company',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Careers', href: '/careers' },
-      { label: 'Press', href: '/press' },
+      { label: 'Contact Us', href: '/contact' },
+      { label: 'Disclaimers', href: '/disclaimer' },
+      { label: 'AMOE', href: '/amoe' },
     ],
   },
   {
-    title: 'Support',
+    title: 'Legal',
     links: [
-      { label: 'Help Center', href: '/help' },
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'Community', href: '/community' },
-      { label: 'Status', href: '/status' },
+      { label: 'Terms of Service', href: '/terms' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Disclaimers', href: '/disclaimers' },
+      { label: 'Responsible Play', href: '/disclaimer' },
     ],
   },
 ]
@@ -121,7 +121,9 @@ export function Footer() {
           <div className="flex gap-4 text-xs text-fg-subtle">
             <Link href="/terms" className="hover:text-fg transition-colors">Terms of Service</Link>
             <Link href="/privacy" className="hover:text-fg transition-colors">Privacy Policy</Link>
-            <Link href="/disclaimers" className="hover:text-fg transition-colors">Disclaimers</Link>
+            <Link href="/disclaimer" className="hover:text-fg transition-colors">Disclaimers</Link>
+            <Link href="/amoe" className="hover:text-fg transition-colors">AMOE</Link>
+            <Link href="/contact" className="hover:text-fg transition-colors">Contact</Link>
           </div>
         </div>
       </div>

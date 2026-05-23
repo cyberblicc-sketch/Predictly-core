@@ -1,6 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "npx prisma generate && next build",
+  "installCommand": "bun install",
   "regions": ["iad1"],
   "headers": [
     {
@@ -9,5 +10,6 @@
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
       ]
     }
-  ]
+  ],
+  "crons": []
 }

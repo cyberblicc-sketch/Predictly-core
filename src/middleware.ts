@@ -3,35 +3,76 @@ import type { NextRequest } from 'next/server'
 
 // ============================================================================
 // Predictly — Route protection middleware
+// Checks predictly_session cookie for protected routes
+// Uses Web Crypto API (Edge Runtime compatible)
 // ============================================================================
+
+const SESSION_SECRET = process.env.SESSION_SECRET || 'predictly-session-secret-2026'
 
 // Route classification
 const PROTECTED_ROUTES = [
   '/dashboard',
   '/portfolio',
-  '/markets/',  // only trade sub-routes
   '/profile',
   '/history',
   '/referrals',
   '/kyc',
+  '/promotions',
+  '/watchlist',
 ]
 
 const ADMIN_ROUTES = ['/admin']
 const ADMIN_LOGIN_ROUTE = '/admin/login'
 
-const PUBLIC_ROUTES = [
-  '/',
-  '/signin',
-  '/signup',
-  '/markets',
-  '/api',
-]
+/** Verify the predictly_session cookie token (Edge-compatible) */
+async function verifySession(cookieValue: string): Promise<{ userId: string; valid: boolean }> {
+  try {
+    const parts = cookieValue.split(':')
+    if (parts.length !== 3) return { userId: '', valid: false }
+    const [userId, timestamp, sig] = parts
 
-export function middleware(request: NextRequest) {
+    // Import the secret key for HMAC
+    const encoder = new TextEncoder()
+    const keyData = encoder.encode(SESSION_SECRET)
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    )
+
+    // Compute the expected signature
+    const message = encoder.encode(`${userId}:${timestamp}`)
+    const signature = await crypto.subtle.sign('HMAC', key, message)
+    const sigArray = new Uint8Array(signature)
+    // Take first 8 bytes and convert to hex (16 hex chars) to match server-side .slice(0, 16)
+    const expectedSig = Array.from(sigArray.slice(0, 8))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+
+    if (sig !== expectedSig) return { userId: '', valid: false }
+
+    // Check if session is less than 7 days old
+    const sessionAge = Date.now() - parseInt(timestamp)
+    if (sessionAge > 7 * 24 * 60 * 60 * 1000) return { userId: '', valid: false }
+
+    return { userId, valid: true }
+  } catch {
+    return { userId: '', valid: false }
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // ── API routes: always pass through ──────────────────────────────────────
   if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
+  // ── Static assets: always pass through ───────────────────────────────────
+  if (pathname.startsWith('/_next/') || pathname.includes('.')) {
     return NextResponse.next()
   }
 
@@ -42,42 +83,36 @@ export function middleware(request: NextRequest) {
 
   // ── Admin routes: check admin_session cookie ─────────────────────────────
   if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
-    // TODO: In production, verify a signed JWT or session token here.
-    // For demo mode, we allow all admin routes through — the client-side
-    // admin layout and API routes handle their own auth checks.
-    //
-    // Production implementation:
-    //   const adminSession = request.cookies.get('admin_session')
-    //   if (!adminSession || !verifyToken(adminSession.value)) {
-    //     return NextResponse.redirect(new URL('/admin/login', request.url))
-    //   }
+    const adminSession = request.cookies.get('admin_session')
+    if (!adminSession?.value) {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
     return NextResponse.next()
   }
 
-  // ── Protected routes: check user auth ────────────────────────────────────
-  const isProtected = PROTECTED_ROUTES.some((route) => {
-    if (route.endsWith('/')) {
-      // Special case: /markets/ only protects sub-routes (like /markets/abc/trade)
-      // but NOT /markets itself or /markets/[id] view pages
-      if (route === '/markets/') {
-        return pathname.includes('/trade')
-      }
-      return pathname.startsWith(route)
-    }
-    return pathname.startsWith(route)
-  })
+  // ── Protected routes: check user session cookie ──────────────────────────
+  const isProtected = PROTECTED_ROUTES.some((route) =>
+    pathname === route || pathname.startsWith(route + '/')
+  )
 
   if (isProtected) {
-    // TODO: In production, check for a valid user session/token here.
-    // For demo mode, we allow all protected routes through.
-    //
-    // Production implementation:
-    //   const session = request.cookies.get('session')
-    //   if (!session || !verifyToken(session.value)) {
-    //     const signInUrl = new URL('/signin', request.url)
-    //     signInUrl.searchParams.set('callbackUrl', pathname)
-    //     return NextResponse.redirect(signInUrl)
-    //   }
+    const sessionCookie = request.cookies.get('predictly_session')
+    if (!sessionCookie?.value) {
+      const signInUrl = new URL('/signin', request.url)
+      signInUrl.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(signInUrl)
+    }
+
+    const { valid } = await verifySession(sessionCookie.value)
+    if (!valid) {
+      const signInUrl = new URL('/signin', request.url)
+      signInUrl.searchParams.set('callbackUrl', pathname)
+      const response = NextResponse.redirect(signInUrl)
+      // Clear invalid session
+      response.cookies.set('predictly_session', '', { maxAge: 0, path: '/' })
+      return response
+    }
+
     return NextResponse.next()
   }
 
@@ -87,13 +122,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, etc.)
-     */
     '/((?!_next/static|_next/image|favicon.ico|logo.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

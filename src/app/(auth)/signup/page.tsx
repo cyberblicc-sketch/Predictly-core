@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, Eye, EyeOff, User, Gift } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, User, Gift, AlertCircle, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Card,
@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
 export default function SignUpPage() {
@@ -29,33 +31,75 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  // Password strength calculation
+  const passwordStrength = useMemo(() => {
+    if (!password) return { score: 0, label: '', color: '' }
+    let score = 0
+    const checks = {
+      length: password.length >= 8,
+      hasNumber: /\d/.test(password),
+      hasUppercase: /[A-Z]/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      hasLower: /[a-z]/.test(password),
+    }
+    if (checks.length) score += 25
+    if (checks.hasNumber) score += 25
+    if (checks.hasUppercase) score += 25
+    if (checks.hasSpecial || checks.hasLower) score += 25
+
+    if (score <= 25) return { score, label: 'Weak', color: 'bg-no', checks }
+    if (score <= 50) return { score, label: 'Fair', color: 'bg-warn', checks }
+    if (score <= 75) return { score, label: 'Good', color: 'bg-yes', checks }
+    return { score, label: 'Strong', color: 'bg-yes', checks }
+  }, [password])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match', {
-        description: 'Please make sure both passwords are the same.',
-      })
+      setError('Passwords do not match')
       return
     }
 
     if (!agreedToTerms) {
-      toast.error('Terms required', {
-        description: 'You must agree to the Terms of Service and Privacy Policy.',
-      })
+      setError('You must agree to the Terms of Service and Privacy Policy')
       return
     }
 
     setLoading(true)
 
-    // Demo: simulate sign-up with a toast and redirect
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, username, referralCode }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Sign up failed')
+        return
+      }
+
+      // Set session cookie
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: data.user.id }),
+      })
+
       toast.success('Account created!', {
         description: 'Welcome to Predictly! Redirecting to dashboard...',
       })
       router.push('/dashboard')
-    }, 1000)
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -68,6 +112,14 @@ export default function SignUpPage() {
       </CardHeader>
 
       <CardContent className="space-y-6 pt-2">
+        {/* Error alert */}
+        {error && (
+          <Alert variant="destructive" className="bg-no-soft border-no-border">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* OAuth buttons */}
         <div className="grid grid-cols-2 gap-3">
           <Button
@@ -134,7 +186,7 @@ export default function SignUpPage() {
                 id="username"
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => { setUsername(e.target.value); setError('') }}
                 placeholder="Choose a username"
                 className="pl-10 h-11 bg-bg-subtle border-border focus:border-brand"
                 required
@@ -151,7 +203,7 @@ export default function SignUpPage() {
                 id="signup-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setError('') }}
                 placeholder="trader@example.com"
                 className="pl-10 h-11 bg-bg-subtle border-border focus:border-brand"
                 required
@@ -168,7 +220,7 @@ export default function SignUpPage() {
                 id="signup-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setError('') }}
                 placeholder="Create a password"
                 className="pl-10 pr-10 h-11 bg-bg-subtle border-border focus:border-brand"
                 required
@@ -186,6 +238,53 @@ export default function SignUpPage() {
                 )}
               </button>
             </div>
+
+            {/* Password strength indicator */}
+            {password && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Progress value={passwordStrength.score} className="h-1.5 flex-1" />
+                  <span className={cn(
+                    'text-xs font-medium',
+                    passwordStrength.score <= 25 ? 'text-no' :
+                    passwordStrength.score <= 50 ? 'text-warn' :
+                    'text-yes'
+                  )}>
+                    {passwordStrength.label}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  <div className={cn(
+                    'flex items-center gap-1.5 text-xs',
+                    passwordStrength.checks?.length ? 'text-yes' : 'text-fg-subtle'
+                  )}>
+                    {passwordStrength.checks?.length ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                    At least 8 characters
+                  </div>
+                  <div className={cn(
+                    'flex items-center gap-1.5 text-xs',
+                    passwordStrength.checks?.hasNumber ? 'text-yes' : 'text-fg-subtle'
+                  )}>
+                    {passwordStrength.checks?.hasNumber ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                    Contains a number
+                  </div>
+                  <div className={cn(
+                    'flex items-center gap-1.5 text-xs',
+                    passwordStrength.checks?.hasUppercase ? 'text-yes' : 'text-fg-subtle'
+                  )}>
+                    {passwordStrength.checks?.hasUppercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                    Contains uppercase
+                  </div>
+                  <div className={cn(
+                    'flex items-center gap-1.5 text-xs',
+                    passwordStrength.checks?.hasSpecial ? 'text-yes' : 'text-fg-subtle'
+                  )}>
+                    {passwordStrength.checks?.hasSpecial ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                    Special character
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Confirm Password */}
@@ -197,19 +296,25 @@ export default function SignUpPage() {
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => { setConfirmPassword(e.target.value); setError('') }}
                 placeholder="Confirm your password"
-                className="pl-10 h-11 bg-bg-subtle border-border focus:border-brand"
+                className={cn(
+                  'pl-10 h-11 bg-bg-subtle border-border focus:border-brand',
+                  confirmPassword && confirmPassword !== password && 'border-no focus:border-no'
+                )}
                 required
               />
             </div>
+            {confirmPassword && confirmPassword !== password && (
+              <p className="text-xs text-no">Passwords do not match</p>
+            )}
           </div>
 
           {/* Referral Code */}
           <div className="space-y-2">
             <Label htmlFor="referral-code">
               Referral Code{' '}
-              <span className="text-fg-subtle font-normal">(optional)</span>
+              <span className="text-fg-subtle font-normal">(optional — earn bonus SC!)</span>
             </Label>
             <div className="relative">
               <Gift className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-subtle" />
@@ -222,6 +327,9 @@ export default function SignUpPage() {
                 className="pl-10 h-11 bg-bg-subtle border-border focus:border-brand"
               />
             </div>
+            {referralCode && (
+              <p className="text-xs text-sweeps">Referral code applied — you&apos;ll receive 20 SC bonus on sign up!</p>
+            )}
           </div>
 
           {/* Terms checkbox */}
@@ -229,7 +337,7 @@ export default function SignUpPage() {
             <Checkbox
               id="terms"
               checked={agreedToTerms}
-              onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+              onCheckedChange={(checked) => { setAgreedToTerms(checked === true); setError('') }}
               className="mt-0.5"
             />
             <Label htmlFor="terms" className="text-xs text-fg-muted leading-relaxed cursor-pointer font-normal">

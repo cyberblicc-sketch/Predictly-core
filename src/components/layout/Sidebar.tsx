@@ -9,6 +9,7 @@ import { mockUser } from '@/lib/mockData'
 import {
   LayoutDashboard, TrendingUp, Briefcase, User, Trophy,
   Gift, History, ChevronLeft, ChevronRight, Shield, Crown,
+  BookmarkPlus, Tag,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -20,8 +21,10 @@ const navItems = [
   { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/markets',    icon: TrendingUp,      label: 'Markets' },
   { href: '/portfolio',  icon: Briefcase,       label: 'Portfolio' },
+  { href: '/watchlist',  icon: BookmarkPlus,    label: 'Watchlist' },
   { href: '/history',    icon: History,         label: 'History' },
   { href: '/leaderboard',icon: Trophy,          label: 'Leaderboard' },
+  { href: '/promotions', icon: Tag,             label: 'Promotions' },
   { href: '/referrals',  icon: Gift,            label: 'Referrals' },
   { href: '/profile',    icon: User,            label: 'Profile' },
 ]
