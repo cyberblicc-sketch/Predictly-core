@@ -68,3 +68,56 @@ export function formatCurrency(amount: number, currency: 'GC' | 'SC' | 'USD' = '
   if (currency === 'SC') return `${amount.toLocaleString()} SC`
   return formatUSD(amount, { compact: false })
 }
+
+// ── Supreme Fusion Utility Functions ──────────────────────────────────────────
+
+/** Calculate P&L from entry and current prices */
+export function calculatePnl(
+  entryPrice: number,
+  currentPrice: number,
+  stake: number,
+  side: 'YES' | 'NO' = 'YES'
+): number {
+  if (side === 'YES') {
+    return ((currentPrice - entryPrice) / entryPrice) * stake
+  }
+  return ((entryPrice - currentPrice) / entryPrice) * stake
+}
+
+/** Human-readable relative time ("3 hours ago", "Just now") */
+export function timeAgo(dateOrStr: string | Date): string {
+  const date = typeof dateOrStr === 'string' ? new Date(dateOrStr) : dateOrStr
+  const now = Date.now()
+  const diff = now - date.getTime()
+
+  if (diff < 0) return 'Just now'
+
+  const seconds = Math.floor(diff / 1000)
+  if (seconds < 60) return 'Just now'
+
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+
+  const months = Math.floor(days / 30)
+  if (months < 12) return `${months}mo ago`
+
+  const years = Math.floor(months / 12)
+  return `${years}y ago`
+}
+
+/** Shorten a wallet address or long ID for display */
+export function truncateAddress(address: string, start = 6, end = 4): string {
+  if (!address || address.length <= start + end) return address
+  return `${address.slice(0, start)}...${address.slice(-end)}`
+}
+
+/** Format a decimal as percentage with configurable decimals */
+export function formatPercentage(value: number, decimals = 1): string {
+  return `${(value * 100).toFixed(decimals)}%`
+}

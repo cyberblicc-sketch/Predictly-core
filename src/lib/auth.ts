@@ -189,3 +189,69 @@ export async function isAdmin(userId: string): Promise<boolean> {
     return false
   }
 }
+
+// ── Password Reset & Verification ────────────────────────────────────────────
+
+/** Send a password reset email to the user */
+export async function resetPassword(email: string) {
+  try {
+    const client = createServerClient()
+    const { data, error } = await client.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/auth/callback`,
+    })
+    if (error) throw error
+    return { data, error: null }
+  } catch (err) {
+    console.error('[Auth] resetPassword failed:', err)
+    return { data: null, error: err as Error }
+  }
+}
+
+/** Verify an email OTP token */
+export async function verifyOtp(email: string, token: string) {
+  try {
+    const client = createServerClient()
+    const { data, error } = await client.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
+    })
+    if (error) throw error
+    return { user: data.user, session: data.session, error: null }
+  } catch (err) {
+    console.error('[Auth] verifyOtp failed:', err)
+    return { user: null, session: null, error: err as Error }
+  }
+}
+
+/** Send a phone verification OTP */
+export async function sendPhoneVerification(phone: string) {
+  try {
+    const client = createServerClient()
+    const { data, error } = await client.auth.signInWithOtp({
+      phone,
+    })
+    if (error) throw error
+    return { data, error: null }
+  } catch (err) {
+    console.error('[Auth] sendPhoneVerification failed:', err)
+    return { data: null, error: err as Error }
+  }
+}
+
+/** Verify a phone OTP token */
+export async function verifyPhone(phone: string, token: string) {
+  try {
+    const client = createServerClient()
+    const { data, error } = await client.auth.verifyOtp({
+      phone,
+      token,
+      type: 'sms',
+    })
+    if (error) throw error
+    return { user: data.user, session: data.session, error: null }
+  } catch (err) {
+    console.error('[Auth] verifyPhone failed:', err)
+    return { user: null, session: null, error: err as Error }
+  }
+}

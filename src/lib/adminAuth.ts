@@ -71,3 +71,122 @@ export async function clearAdminSession(): Promise<void> {
     throw new Error('Failed to clear admin session')
   }
 }
+
+// ── Admin Helper Functions ────────────────────────────────────────────────────
+
+/**
+ * Log an admin action to the audit trail.
+ * Creates a record in the admin_logs table for traceability.
+ */
+export async function logAdminAction(params: {
+  adminId: string
+  action: string
+  targetUserId?: string
+  targetMarketId?: string
+  changes?: Record<string, unknown>
+  reason?: string
+}): Promise<boolean> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn('[AdminAuth] Supabase not configured — admin action not logged')
+      return false
+    }
+
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const { error } = await supabase.from('admin_logs').insert({
+      admin_id: params.adminId,
+      action: params.action,
+      target_user_id: params.targetUserId ?? null,
+      target_market_id: params.targetMarketId ?? null,
+      changes: params.changes ?? {},
+      reason: params.reason ?? null,
+    })
+
+    if (error) {
+      console.error('[AdminAuth] logAdminAction DB error:', error.message)
+      return false
+    }
+
+    return true
+  } catch (err) {
+    console.error('[AdminAuth] logAdminAction failed:', err)
+    return false
+  }
+}
+
+/**
+ * Adjust a user's balance as an admin action.
+ * Updates the user's balance and logs the transaction.
+ */
+export async function adminAdjustBalance(params: {
+  adminId: string
+  userId: string
+  currency: 'sc' | 'gc'
+  amount: number
+  reason: string
+}): Promise<{ success: boolean; newBalance?: number; error?: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      return { success: false, error: 'Supabase not configured' }
+    }
+
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Get current balance with lock
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select(`${params.currency === 'sc' ? 'sc_balance' : 'gc_balance'}`)
+      .eq('id', params.userId)
+      .single()
+
+    if (userError || !user) {
+      return { success: false, error: 'User not found' }
+    }
+
+    const balanceField = params.currency === 'sc' ? 'sc_balance' : 'gc_balance'
+    const currentBalance = user[balanceField] as number
+    const newBalance = currentBalance + params.amount
+
+    if (newBalance < 0) {
+      return { success: false, error: 'Insufficient balance after adjustment' }
+    }
+
+    // Update balance
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ [balanceField]: newBalance })
+      .eq('id', params.userId)
+
+    if (updateError) {
+      return { success: false, error: updateError.message }
+    }
+
+    // Log admin action
+    await logAdminAction({
+      adminId: params.adminId,
+      action: 'BALANCE_ADJUST',
+      targetUserId: params.userId,
+      changes: {
+        currency: params.currency.toUpperCase(),
+        amount: params.amount,
+        previousBalance: currentBalance,
+        newBalance,
+      },
+      reason: params.reason,
+    })
+
+    return { success: true, newBalance }
+  } catch (err) {
+    console.error('[AdminAuth] adminAdjustBalance failed:', err)
+    return { success: false, error: 'Internal error' }
+  }
+}

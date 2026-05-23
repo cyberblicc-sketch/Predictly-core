@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   Search, Bell, Wallet, ChevronDown, Menu, User, LogOut, Settings,
   Coins, Gem, Plus, Moon, Sun,
 } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { mockUser } from '@/lib/mockData'
+import { markets, categories } from '@/lib/mockData'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command'
 import { MobileNav } from '@/components/layout/MobileNav'
 
 const NAV_LINKS = [
@@ -37,11 +47,30 @@ const scBalance = mockUser.sweeps_balance
 
 export function Header() {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [isDark, setIsDark] = useState(true)
+  const [commandOpen, setCommandOpen] = useState(false)
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' || pathname.startsWith('/markets') : pathname.startsWith(href)
+
+  // ⌘K shortcut to open command palette
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setCommandOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
+
+  const runCommand = useCallback((command: () => void) => {
+    setCommandOpen(false)
+    command()
+  }, [])
 
   return (
     <>
@@ -61,15 +90,15 @@ export function Header() {
 
             {/* Search — desktop */}
             <div className="hidden md:flex flex-1 max-w-xl">
-              <div className="relative w-full">
+              <button
+                type="button"
+                onClick={() => setCommandOpen(true)}
+                className="relative w-full flex items-center h-10 pl-10 pr-12 rounded-lg bg-bg-subtle border border-border hover:border-border-strong focus:border-brand text-sm text-fg-subtle transition-colors text-left"
+              >
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-subtle" />
-                <input
-                  type="text"
-                  placeholder="Search markets, traders, topics..."
-                  className="w-full h-10 pl-10 pr-12 rounded-lg bg-bg-subtle border border-border focus:border-brand focus:outline-none text-sm placeholder:text-fg-subtle transition-colors"
-                />
+                <span className="text-fg-subtle">Search markets, traders, topics...</span>
                 <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-2xs text-fg-subtle border border-border rounded px-1.5 py-0.5 font-mono">⌘K</kbd>
-              </div>
+              </button>
             </div>
 
             {/* Nav links — desktop */}
@@ -240,6 +269,76 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {/* Command Palette (⌘K) */}
+      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
+        <CommandInput placeholder="Search markets, categories, pages..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+
+          {/* Pages */}
+          <CommandGroup heading="Pages">
+            {NAV_LINKS.map((link) => (
+              <CommandItem
+                key={link.href}
+                onSelect={() => runCommand(() => router.push(link.href))}
+              >
+                <Search className="mr-2 h-4 w-4" />
+                {link.label}
+              </CommandItem>
+            ))}
+            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard'))}>
+              <Search className="mr-2 h-4 w-4" />
+              Dashboard
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/history'))}>
+              <Search className="mr-2 h-4 w-4" />
+              Transaction History
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/referrals'))}>
+              <Search className="mr-2 h-4 w-4" />
+              Referrals
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/kyc'))}>
+              <Search className="mr-2 h-4 w-4" />
+              KYC Verification
+            </CommandItem>
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          {/* Categories */}
+          <CommandGroup heading="Categories">
+            {categories.filter(c => c.id !== 'All').map((cat) => (
+              <CommandItem
+                key={cat.id}
+                onSelect={() => runCommand(() => router.push(`/markets?category=${cat.id}`))}
+              >
+                <span className="mr-2">{cat.emoji}</span>
+                {cat.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          {/* Markets */}
+          <CommandGroup heading="Markets">
+            {markets.map((m) => (
+              <CommandItem
+                key={m.id}
+                onSelect={() => runCommand(() => router.push(`/markets/${m.id}`))}
+              >
+                <span className="mr-2">{m.imageEmoji}</span>
+                <span className="flex-1 truncate">{m.question}</span>
+                <span className="text-xs text-fg-muted ml-2 tabular-nums">
+                  {Math.round((m.outcomes[0]?.price ?? 0.5) * 100)}%
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
 
       {/* Mobile navigation drawer */}
       <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />

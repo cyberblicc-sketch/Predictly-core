@@ -1,8 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ============================================================================
+// Supreme Fusion Prediction Market — Prisma Schema
+// Mirrors the Supabase migrations (001_initial, 002_ai_swarm, 003_rpc)
+// Used for local SQLite development; Supabase is used in production
+// ============================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +13,505 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums (simulated as strings for SQLite) ──────────────────────────────────
+
+// ─── Core Tables ──────────────────────────────────────────────────────────────
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(uuid())
+  email           String   @unique
+  phone           String?
+  name            String?
+  handle          String?  @unique
+  passwordHash    String?  @map("password_hash")
+  authProvider     String   @default("email") @map("auth_provider")
+
+  // Dual wallet system
+  gcBalance       Float    @default(0) @map("gc_balance")
+  scBalance       Float    @default(0) @map("sc_balance")
+
+  // KYC
+  kycStatus       String   @default("none") @map("kyc_status")
+  kycVerifiedAt   DateTime? @map("kyc_verified_at")
+  kycDocumentUrl  String?  @map("kyc_document_url")
+
+  // User tier
+  userTier        String   @default("bronze") @map("user_tier")
+
+  // Compliance
+  ageVerified     Boolean  @default(false) @map("age_verified")
+  jurisdiction    String?
+  isRestricted    Boolean  @default(false) @map("is_restricted")
+  selfExcluded    Boolean  @default(false) @map("self_excluded")
+  exclusionUntil  DateTime? @map("exclusion_until")
+
+  // Gamification
+  dailyStreak     Int      @default(0) @map("daily_streak")
+  lastDailyClaim  DateTime? @map("last_daily_claim")
+  totalWageredSc  Float    @default(0) @map("total_wagered_sc")
+  totalWageredGc  Float    @default(0) @map("total_wagered_gc")
+  totalWonSc      Float    @default(0) @map("total_won_sc")
+
+  // Referrals
+  referralCode         String?  @unique @map("referral_code")
+  referredByCode       String?  @map("referred_by_code")
+  referralBonusClaimed Boolean  @default(false) @map("referral_bonus_claimed")
+
+  // Stripe
+  stripeCustomerId String?  @map("stripe_customer_id")
+
+  // Admin flags
+  isAdmin         Boolean  @default(false) @map("is_admin")
+  isPublisher     Boolean  @default(false) @map("is_publisher")
+  isSystemUser    Boolean  @default(false) @map("is_system_user")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  positions       Position[]
+  transactions    Transaction[]
+  referralsMade   Referral[]  @relation("Referrer")
+  referralsReceived Referral[] @relation("Referred")
+  adminLogs       AdminLog[]
+  fraudReports    FraudReport[] @relation("Reporter")
+  kycRequests     KycRequest[]
+  purchases       Purchase[]
+  socialShares    SocialShare[]
+  marketComments  MarketComment[]
+
+  @@map("users")
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Category {
+  id            Int      @id @default(autoincrement())
+  name          String
+  slug          String   @unique
+  displayOrder  Int      @default(0) @map("display_order")
+  icon          String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  markets       Market[]
+
+  @@map("categories")
+}
+
+model Market {
+  id              String   @id
+  slug            String   @unique
+  question        String
+  description     String?
+  categoryId      Int?     @map("category_id")
+
+  // Market lifecycle
+  status          String   @default("draft")
+
+  // Parimutuel pools (SC)
+  yesPoolSc       Float    @default(0) @map("yes_pool_sc")
+  noPoolSc        Float    @default(0) @map("no_pool_sc")
+
+  // GC pools
+  yesPoolGc       Float    @default(0) @map("yes_pool_gc")
+  noPoolGc        Float    @default(0) @map("no_pool_gc")
+
+  // Implied probability
+  yesProbability  Float    @default(0.5) @map("yes_probability")
+  noProbability   Float    @default(0.5) @map("no_probability")
+
+  // Volume tracking
+  totalVolumeSc   Float    @default(0) @map("total_volume_sc")
+  totalVolumeGc   Float    @default(0) @map("total_volume_gc")
+  volume24hSc     Float    @default(0) @map("volume_24h_sc")
+  totalTraders    Int      @default(0) @map("total_traders")
+
+  // LMSR bootstrapping
+  lmsrActive      Boolean  @default(true) @map("lmsr_active")
+  lmsrB           Float    @default(50) @map("lmsr_b")
+
+  // Resolution
+  resolution          String?
+  resolutionDate      DateTime? @map("resolution_date")
+  resolutionEvidence  String?  @map("resolution_evidence")
+  resolvingAdminId    String?  @map("resolving_admin_id")
+
+  // Safety
+  safetyScore     Int      @default(0) @map("safety_score")
+  safetyChecks    String   @default("[]") @map("safety_checks") // JSON
+
+  // Publisher/creator
+  publisherId     String?  @map("publisher_id")
+  sourceKind      String?  @map("source_kind")
+  sourceUrl       String?  @map("source_url")
+  invalidationClause String? @map("invalidation_clause")
+  rulesText       String?  @map("rules_text")
+
+  // Timing
+  expiresAt       DateTime? @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  category        Category?  @relation(fields: [categoryId], references: [id])
+  positions       Position[]
+  transactions    Transaction[]
+  adminLogs       AdminLog[]
+  fraudReports    FraudReport[]
+  socialShares    SocialShare[]
+  marketComments  MarketComment[]
+  aiAgentTrades   AiAgentTrade[]
+  publisherEarnings PublisherEarning[]
+
+  @@map("markets")
+}
+
+model Position {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  marketId        String   @map("market_id")
+  side            String   // yes or no
+
+  // Currency
+  currency        String   // sc or gc
+
+  // Stake details
+  stake           Float
+  entryProb       Float    @map("entry_prob")
+  cost            Float
+  lmsrSubsidy     Float    @default(0) @map("lmsr_subsidy")
+  poolBefore      Float?   @map("pool_before")
+
+  // Resolution
+  isSettled       Boolean  @default(false) @map("is_settled")
+  payout          Float    @default(0)
+  settledAt       DateTime? @map("settled_at")
+
+  // Early exit
+  isRedeemed      Boolean  @default(false) @map("is_redeemed")
+  redemptionValue Float?   @map("redemption_value")
+  exitFee         Float    @default(0) @map("exit_fee")
+  redeemedAt      DateTime? @map("redeemed_at")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User     @relation(fields: [userId], references: [id])
+  market          Market   @relation(fields: [marketId], references: [id])
+  transactions    Transaction[]
+
+  @@map("positions")
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  type            String
+  amount          Float
+  balanceBefore   Float?   @map("balance_before")
+  balanceAfter    Float?   @map("balance_after")
+  currency        String
+  description     String?
+  referenceId     String?  @map("reference_id")
+  status          String   @default("pending")
+  metadata        String?  // JSON string for SQLite
+  marketId        String?  @map("market_id")
+  positionId      String?  @map("position_id")
+  relatedUserId   String?  @map("related_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User?    @relation(fields: [userId], references: [id])
+  market          Market?  @relation(fields: [marketId], references: [id])
+  position        Position? @relation(fields: [positionId], references: [id])
+
+  @@map("transactions")
+}
+
+model KycRequest {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  status          String   @default("pending")
+  docType         String?  @map("doc_type")
+  docUrl          String?  @map("doc_url")
+  notes           String?
+  reviewedBy      String?  @map("reviewed_by")
+  reviewedAt      DateTime? @map("reviewed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@map("kyc_requests")
+}
+
+model Referral {
+  id              String   @id @default(uuid())
+  referrerId      String   @map("referrer_id")
+  referredUserId  String?  @map("referred_user_id")
+  referralCode    String   @map("referral_code")
+  status          String   @default("pending")
+  rewardSc        Float    @default(20) @map("reward_sc")
+  rewardGold      Float    @default(20000) @map("reward_gold")
+  depositAmount   Float?   @map("deposit_amount")
+  createdAt       DateTime @default(now()) @map("created_at")
+  completedAt     DateTime? @map("completed_at")
+
+  referrer        User     @relation("Referrer", fields: [referrerId], references: [id])
+  referredUser    User?    @relation("Referred", fields: [referredUserId], references: [id])
+
+  @@map("referrals")
+}
+
+model Publisher {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  handle          String   @unique
+  bio             String?
+  avatar          String?
+  tier            String   @default("sprout")
+  warmthScore     Int      @default(0) @map("warmth_score")
+  totalEarned     Float    @default(0) @map("total_earned")
+  marketsCreated  Int      @default(0) @map("markets_created")
+  referralCode    String?  @unique @map("referral_code")
+  verified        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  earnings        PublisherEarning[]
+
+  @@map("publishers")
+}
+
+model PublisherEarning {
+  id              String   @id @default(uuid())
+  publisherId     String   @map("publisher_id")
+  marketId        String   @map("market_id")
+  amount          Float
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  publisher       Publisher @relation(fields: [publisherId], references: [id])
+  market          Market   @relation(fields: [marketId], references: [id])
+
+  @@map("publisher_earnings")
+}
+
+model Achievement {
+  id              String   @id @default(uuid())
+  publisherId     String   @map("publisher_id")
+  badgeKey        String   @map("badge_key")
+  badgeLabel      String   @map("badge_label")
+  badgeIcon       String   @default("🏆") @map("badge_icon")
+  unlockedAt      DateTime @default(now()) @map("unlocked_at")
+
+  @@unique([publisherId, badgeKey])
+  @@map("achievements")
+}
+
+model SocialShare {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  marketId        String?  @map("market_id")
+  positionId      String?  @map("position_id")
+  platform        String   @default("link")
+  message         String?
+  sharedAt        DateTime @default(now()) @map("shared_at")
+  sharesCount     Int      @default(0) @map("shares_count")
+
+  user            User     @relation(fields: [userId], references: [id])
+  market          Market?  @relation(fields: [marketId], references: [id])
+
+  @@map("social_shares")
+}
+
+model MarketComment {
+  id              String   @id @default(uuid())
+  marketId        String   @map("market_id")
+  authorId        String   @map("author_id")
+  content         String
+  parentId        String?  @map("parent_id")
+  upvotes         Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  market          Market   @relation(fields: [marketId], references: [id])
+  user            User     @relation(fields: [authorId], references: [id])
+
+  @@map("market_comments")
+}
+
+model Signal {
+  id              String   @id @default(uuid())
+  source          String
+  headline        String
+  summary         String?
+  convictionScore Float    @default(50) @map("conviction_score")
+  category        String?
+  sourceUrl       String?  @map("source_url")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("signals")
+}
+
+model RedemptionRequest {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  amountSc        Float    @map("amount_sc")
+  amountUsd       Float    @map("amount_usd")
+  status          String   @default("pending")
+  method          String   @default("ach")
+  bankInfo        String?  // JSON string for SQLite
+  notes           String?
+  reviewedBy      String?  @map("reviewed_by")
+  reviewedAt      DateTime? @map("reviewed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("redemption_requests")
+}
+
+model AdminLog {
+  id              String   @id @default(uuid())
+  adminId         String   @map("admin_id")
+  action          String
+  targetUserId    String?  @map("target_user_id")
+  targetMarketId  String?  @map("target_market_id")
+  changes         String?  // JSON string for SQLite
+  reason          String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  admin           User     @relation(fields: [adminId], references: [id])
+  market          Market?  @relation(fields: [targetMarketId], references: [id])
+
+  @@map("admin_logs")
+}
+
+model FraudReport {
+  id              String   @id @default(uuid())
+  reporterId      String   @map("reporter_id")
+  reportedUserId  String?  @map("reported_user_id")
+  marketId        String?  @map("market_id")
+  reportType      String   @map("report_type")
+  description     String?
+  evidenceUrls    String?  // JSON array for SQLite @map("evidence_urls")
+  status          String   @default("pending")
+  resolutionNotes String?  @map("resolution_notes")
+  resolvedBy      String?  @map("resolved_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+  resolvedAt      DateTime? @map("resolved_at")
+
+  reporter        User     @relation("Reporter", fields: [reporterId], references: [id])
+  market          Market?  @relation(fields: [marketId], references: [id])
+
+  @@map("fraud_reports")
+}
+
+model LeaderboardCache {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  rank            Int
+  totalPnl        Float    @default(0) @map("total_pnl")
+  winCount        Int      @default(0) @map("win_count")
+  totalPositions  Int      @default(0) @map("total_positions")
+  winRate         Float    @default(0)
+  thisMonthPnl    Float    @default(0) @map("this_month_pnl")
+  lastUpdated     DateTime @default(now()) @map("last_updated")
+
+  @@map("leaderboard_cache")
+}
+
+model AiAgentTrade {
+  id              String   @id @default(uuid())
+  agentName       String   @map("agent_name")
+  marketId        String   @map("market_id")
+  side            String
+  amount          Float
+  reason          String?
+  status          String   @default("pending")
+  executionPrice  Float?   @map("execution_price")
+  createdAt       DateTime @default(now()) @map("created_at")
+  executedAt      DateTime? @map("executed_at")
+
+  market          Market   @relation(fields: [marketId], references: [id])
+
+  @@map("ai_agent_trades")
+}
+
+model GcPackage {
+  id              Int      @id @default(autoincrement())
+  label           String
+  gcAmount        Float    @map("gc_amount")
+  scBonus         Float    @map("sc_bonus")
+  priceUsd        Float    @map("price_usd")
+  isPopular       Boolean  @default(false) @map("is_popular")
+  sortOrder       Int      @default(0) @map("sort_order")
+  active          Boolean  @default(true)
+
+  @@map("gc_packages")
+}
+
+model AmoeEntry {
+  id              String   @id @default(uuid())
+  fullName        String   @map("full_name")
+  email           String
+  address         String
+  dateOfBirth     DateTime  @map("date_of_birth")
+  scCredited      Float    @default(0) @map("sc_credited")
+  userId          String?  @map("user_id")
+  processed       Boolean  @default(false)
+  receivedAt      DateTime @default(now()) @map("received_at")
+  processedAt     DateTime? @map("processed_at")
+
+  @@map("amoe_entries")
+}
+
+model Purchase {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  amount          Float
+  gcAmount        Int      @map("gc_amount")
+  stripeSessionId String?  @unique @map("stripe_session_id")
+  status          String   @default("pending")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@map("purchases")
+}
+
+model SiteConfig {
+  id              String   @id @default(uuid())
+  key             String   @unique
+  value           String
+  description     String?
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("site_config")
+}
+
+model AiSwarmConfig {
+  key             String   @id
+  value           String
+  description     String?
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_swarm_config")
+}
+
+model AiSwarmSettings {
+  id              String   @id @default(uuid())
+  isEnabled       Boolean  @default(false) @map("is_enabled")
+  maxTradesPerTick Int     @default(10) @map("max_trades_per_tick")
+  maxDailyLoss    Float    @default(50000) @map("max_daily_loss")
+  agentBudgets    String   @default("{}") @map("agent_budgets") // JSON
+  lastTickAt      DateTime? @map("last_tick_at")
+  dailyLoss       Float    @default(0) @map("daily_loss")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_swarm_settings")
+}
+
+model AiDailySpending {
+  id              Int      @id @default(autoincrement())
+  agentName       String   @map("agent_name")
+  date            DateTime @default(now())
+  totalAmount     Float    @default(0) @map("total_amount")
+  tradeCount      Int      @default(0) @map("trade_count")
+  lastUpdated     DateTime @default(now()) @map("last_updated")
+
+  @@unique([agentName, date])
+  @@map("ai_daily_spending")
 }
