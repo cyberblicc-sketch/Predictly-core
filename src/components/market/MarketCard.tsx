@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import * as React from 'react'
 import {
   TrendingUp,
   TrendingDown,
@@ -8,6 +9,10 @@ import {
   Flame,
   Sparkles,
   BarChart3,
+  Flag,
+  Share2,
+  Check,
+  Copy,
 } from 'lucide-react'
 import type { Market, MarketOutcome } from '@/types'
 import { histories } from '@/lib/mockData'
@@ -19,6 +24,22 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market }: MarketCardProps) {
+  const [showReport, setShowReport] = React.useState(false)
+  const [copied, setCopied] = React.useState(false)
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const url = `${window.location.origin}/markets/${market.id}`
+    if (navigator.share) {
+      await navigator.share({ title: market.question, url })
+    } else {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   const isBinary =
     market.outcomes.length === 2 &&
     market.outcomes[0].label.toLowerCase() === 'yes' &&
@@ -36,7 +57,7 @@ export function MarketCard({ market }: MarketCardProps) {
       href={`/markets/${market.id}`}
       className="group relative flex flex-col rounded-xl bg-bg-subtle border border-border hover:border-border-strong hover:bg-bg-elevated transition-all duration-200 overflow-hidden"
     >
-      {/* Badges */}
+      {/* Badges & Actions */}
       <div className="absolute top-3 right-3 flex gap-1.5 z-10">
         {market.trending && (
           <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full bg-no-soft border border-no-border text-no text-2xs font-medium">
@@ -48,6 +69,20 @@ export function MarketCard({ market }: MarketCardProps) {
             <Sparkles className="h-3 w-3" /> New
           </span>
         )}
+        <button
+          onClick={handleShare}
+          className="h-6 w-6 rounded-full bg-bg/80 border border-border flex items-center justify-center hover:bg-bg-elevated transition-colors"
+          aria-label="Share market"
+        >
+          {copied ? <Check className="h-3 w-3 text-yes" /> : <Share2 className="h-3 w-3 text-fg-muted" />}
+        </button>
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowReport(true) }}
+          className="h-6 w-6 rounded-full bg-bg/80 border border-border flex items-center justify-center hover:bg-bg-elevated transition-colors"
+          aria-label="Report market"
+        >
+          <Flag className="h-3 w-3 text-fg-muted" />
+        </button>
       </div>
 
       {/* Header */}
@@ -100,6 +135,35 @@ export function MarketCard({ market }: MarketCardProps) {
           <span>Live</span>
         </div>
       </div>
+
+      {/* Fraud report dialog */}
+      {showReport && (
+        <div
+          className="absolute inset-0 z-20 bg-bg/95 backdrop-blur-sm rounded-xl flex flex-col p-4"
+          onClick={(e) => e.preventDefault()}
+        >
+          <h4 className="text-sm font-semibold mb-2">Report Market</h4>
+          <p className="text-2xs text-fg-muted mb-3">If you believe this market violates our rules, please describe the issue.</p>
+          <textarea
+            className="w-full h-20 rounded-lg bg-bg border border-border text-sm p-2 resize-none focus:outline-none focus:border-brand placeholder:text-fg-subtle"
+            placeholder="Describe the issue..."
+          />
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowReport(false) }}
+              className="flex-1 h-8 rounded-lg bg-bg-subtle border border-border text-xs font-medium text-fg-muted hover:text-fg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowReport(false) }}
+              className="flex-1 h-8 rounded-lg bg-no text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+            >
+              Submit Report
+            </button>
+          </div>
+        </div>
+      )}
     </Link>
   )
 }

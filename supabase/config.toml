@@ -1,0 +1,75 @@
+# ============================================================================
+# SUPREME FUSION PREDICTION MARKET — Supabase Configuration
+# ============================================================================
+
+[project]
+project_id = "supreme-fusion-prediction-market"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[realtime]
+enabled = true
+ip_version = "ipv4"
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+[inbucket]
+enabled = true
+port = 54324
+smtp_port = 54325
+pop3_port = 54326
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_secret = "your-jwt-secret-change-in-production"
+jwt_exp = 3600
+refresh_token_exp = 2592000
+enable_auto_confirmation = false
+enable_phone_confirmation = false
+
+[auth.email]
+enabled = true
+double_confirm_changes = false
+enable_confirmations = true
+
+[auth.google]
+enabled = true
+client_id = "your-google-client-id"
+client_secret = "your-google-client-secret"
+
+[auth.apple]
+enabled = true
+client_id = "your-apple-client-id"
+client_secret = "your-apple-client-secret"
+team_id = "your-apple-team-id"
+key_id = "your-apple-key-id"
+
+[auth.sms]
+enabled = false
+
+[edge_runtime]
+enabled = true
+
+[analytics]
+enabled = true
+port = 54327
+backend = "postgres"

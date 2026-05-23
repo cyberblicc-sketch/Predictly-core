@@ -273,10 +273,45 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featuredMarkets.map((m) => (
-              <MarketCard key={m.id} market={m} />
-            ))}
+          <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-6">
+            {/* Market cards grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+              {featuredMarkets.map((m) => (
+                <MarketCard key={m.id} market={m} />
+              ))}
+            </div>
+
+            {/* Top Movers sidebar */}
+            <div className="mt-8 lg:mt-0 rounded-xl bg-bg-subtle border border-border p-5 h-fit">
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                <Activity className="h-4 w-4 text-brand" />
+                Top Movers (24h)
+              </h3>
+              <ul className="space-y-3">
+                {markets
+                  .filter(m => m.outcomes[0]?.delta7d)
+                  .sort((a, b) => Math.abs(b.outcomes[0].delta7d) - Math.abs(a.outcomes[0].delta7d))
+                  .slice(0, 5)
+                  .map(m => {
+                    const delta = m.outcomes[0].delta7d
+                    const positive = delta >= 0
+                    return (
+                      <li key={m.id}>
+                        <Link href={`/markets/${m.id}`} className="flex items-center gap-3 rounded-lg p-2 hover:bg-bg-elevated transition-colors">
+                          <span className="text-lg">{m.imageEmoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium truncate">{m.question}</div>
+                            <div className="text-2xs text-fg-subtle">{m.category}</div>
+                          </div>
+                          <span className={cn('text-sm font-semibold tabular-nums', positive ? 'text-yes' : 'text-no')}>
+                            {positive ? '+' : ''}{(delta * 100).toFixed(1)}%
+                          </span>
+                        </Link>
+                      </li>
+                    )
+                  })}
+              </ul>
+            </div>
           </div>
 
           {/* Mobile View All button */}

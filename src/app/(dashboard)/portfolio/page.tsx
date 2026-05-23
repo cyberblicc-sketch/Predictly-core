@@ -8,7 +8,7 @@ import {
 import { portfolio, portfolioHistory } from '@/lib/mockData'
 import { PositionCard } from '@/components/portfolio/PositionCard'
 import { formatUSD, formatCents, cn } from '@/lib/utils'
-import { Wallet, TrendingUp, Coins, Gem, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { Wallet, TrendingUp, Coins, Gem, ArrowUpRight, ArrowDownRight, Download } from 'lucide-react'
 
 const TABS = ['Active', 'Resolved', 'History'] as const
 
@@ -17,6 +17,31 @@ export default function PortfolioPage() {
   const totalPnl = portfolio.positions.reduce((sum, p) => sum + (p.pnl || 0), 0)
   const isProfit = totalPnl >= 0
 
+  const handleExportCSV = () => {
+    const headers = ['Market', 'Outcome', 'Shares', 'Avg Price', 'Current', 'Value', 'P&L']
+    const rows = portfolio.positions.map(p => {
+      const pnl = p.pnl ?? (p.currentPrice - p.avgPrice) * p.shares
+      const value = p.currentPrice * p.shares
+      return [
+        `"${p.marketTitle}"`,
+        p.outcome,
+        p.shares,
+        p.avgPrice.toFixed(2),
+        p.currentPrice.toFixed(2),
+        value.toFixed(2),
+        pnl.toFixed(2),
+      ].join(',')
+    })
+    const csv = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `supreme-fusion-portfolio-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const chartTrendUp = portfolioHistory.length > 1
     ? portfolioHistory[portfolioHistory.length - 1].value >= portfolioHistory[0].value
     : true
@@ -24,9 +49,18 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Portfolio</h1>
-        <p className="text-sm text-fg-muted mt-1">Track your positions and performance</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Portfolio</h1>
+          <p className="text-sm text-fg-muted mt-1">Track your positions and performance</p>
+        </div>
+        <button
+          onClick={handleExportCSV}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-bg-subtle border border-border hover:border-border-strong text-sm font-medium text-fg-muted hover:text-fg transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export CSV
+        </button>
       </div>
 
       {/* Summary cards */}

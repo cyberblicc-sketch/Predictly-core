@@ -15,6 +15,8 @@ interface TradeFormProps {
     currency: Currency
   ) => Promise<void>
   disabled?: boolean
+  gcBalance?: number
+  scBalance?: number
 }
 
 export function TradeForm({
@@ -22,6 +24,8 @@ export function TradeForm({
   defaultOutcomeId,
   onTrade,
   disabled,
+  gcBalance,
+  scBalance,
 }: TradeFormProps) {
   // Binary market detection
   const isBinary =
@@ -278,6 +282,11 @@ export function TradeForm({
           </div>
         </div>
 
+        {/* Balance display */}
+        <button type="button" className="w-full h-9 rounded-lg bg-bg border border-border text-xs text-fg-muted hover:text-fg transition-colors flex items-center justify-center gap-1.5 tabular-nums">
+          Balance: {currency === 'GC' ? (gcBalance ?? 50000).toLocaleString() : (scBalance ?? 2500).toLocaleString()} {currency}
+        </button>
+
         {/* Amount input */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-fg-muted">
@@ -407,6 +416,12 @@ export function TradeForm({
             </>
           )}
         </button>
+        {/* Terms text */}
+        <p className="text-2xs text-fg-subtle text-center leading-relaxed">
+          By trading you agree to our{' '}
+          <a href="/terms" className="text-brand hover:underline">Terms of Service</a>{' '}and{' '}
+          <a href="/rules" className="text-brand hover:underline">Market Rules</a>
+        </p>
       </form>
     </div>
   )

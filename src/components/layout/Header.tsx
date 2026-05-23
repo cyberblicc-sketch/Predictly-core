@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Search, Bell, Wallet, ChevronDown, Menu, User, LogOut, Settings,
-  Coins, Gem, Plus,
+  Coins, Gem, Plus, Moon, Sun,
 } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { mockUser } from '@/lib/mockData'
@@ -38,6 +38,7 @@ const scBalance = mockUser.sweeps_balance
 export function Header() {
   const pathname = usePathname()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [isDark, setIsDark] = useState(true)
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' || pathname.startsWith('/markets') : pathname.startsWith(href)
@@ -170,6 +171,19 @@ export function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Theme toggle */}
+              <button
+                onClick={() => {
+                  const next = !isDark
+                  setIsDark(next)
+                  document.documentElement.classList.toggle('light', !next)
+                }}
+                className="h-10 w-10 rounded-lg bg-bg-subtle border border-border hover:border-border-strong flex items-center justify-center transition-colors"
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDark ? <Moon className="h-4 w-4 text-fg-muted" /> : <Sun className="h-4 w-4 text-gold" />}
+              </button>
 
               {/* Deposit button */}
               <button className="hidden sm:inline-flex h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)]">
