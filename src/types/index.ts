@@ -596,3 +596,192 @@ export interface WisdomFeedPricingTier {
   data_delay: string
   included_endpoints: string[]
 }
+
+// --- AI Employee System types ---
+
+export type AgentType = 'scout' | 'oddsmaker' | 'clerk' | 'fraud_analyst' | 'content' | 'supervisor'
+export type AgentTaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'escalated'
+export type AgentActionType = 'scout_scan' | 'market_generate' | 'db_write' | 'fraud_check' | 'content_generate' | 'supervisor_coordinate' | 'market_review' | 'resolution_check'
+export type MarketCandidateStatus = 'pending_review' | 'approved' | 'rejected' | 'published' | 'expired'
+export type FraudFlagSeverity = 'low' | 'medium' | 'high' | 'critical'
+export type FraudFlagStatus = 'open' | 'investigating' | 'resolved' | 'dismissed'
+export type ContentQueueStatus = 'pending' | 'generating' | 'ready' | 'published' | 'failed'
+export type ContentType = 'social_post' | 'market_summary' | 'seo_description' | 'trending_report' | 'daily_recap'
+
+export interface AgentTask {
+  id: string
+  agent_type: AgentType
+  action_type: AgentActionType
+  status: AgentTaskStatus
+  input: Record<string, unknown>
+  output: Record<string, unknown> | null
+  confidence: number | null
+  retry_count: number
+  max_retries: number
+  priority: number
+  scheduled_at: string
+  started_at: string | null
+  completed_at: string | null
+  error_message: string | null
+  parent_task_id: string | null
+  created_at: string
+}
+
+export interface AgentAction {
+  id: string
+  task_id: string
+  agent_type: AgentType
+  action_type: AgentActionType
+  description: string
+  input_summary: string
+  output_summary: string
+  confidence: number | null
+  duration_ms: number | null
+  created_at: string
+}
+
+export interface AgentFailure {
+  id: string
+  task_id: string
+  agent_type: AgentType
+  error_type: string
+  error_message: string
+  stack_trace: string | null
+  retry_attempt: number
+  resolved: boolean
+  created_at: string
+}
+
+export interface AgentMemory {
+  id: string
+  agent_type: AgentType
+  memory_type: 'finding' | 'pattern' | 'preference' | 'correction' | 'context'
+  key: string
+  value: Record<string, unknown>
+  relevance_score: number
+  accessed_count: number
+  expires_at: string | null
+  created_at: string
+}
+
+export interface ScoutFinding {
+  id: string
+  source: string
+  source_url: string | null
+  title: string
+  summary: string
+  category: Category | 'General'
+  confidence: number
+  sentiment_score: number
+  entities: string[]
+  topic_tags: string[]
+  market_potential: 'high' | 'medium' | 'low' | 'none'
+  processed: boolean
+  market_candidate_id: string | null
+  created_at: string
+}
+
+export interface MarketCandidate {
+  id: string
+  scout_finding_id: string | null
+  question: string
+  short_title: string
+  description: string
+  category: Category
+  outcomes: string[]
+  estimated_probabilities: number[]
+  resolution_criteria: string
+  resolver_source: string
+  close_date: string | null
+  suggested_liquidity: number
+  semantic_hash: string
+  duplicate_of: string | null
+  status: MarketCandidateStatus
+  reviewed_by: string | null
+  reviewed_at: string | null
+  review_notes: string | null
+  published_market_id: string | null
+  created_at: string
+}
+
+export interface FraudFlag {
+  id: string
+  user_id: string | null
+  market_id: string | null
+  flag_type: 'wash_trading' | 'referral_abuse' | 'suspicious_volume' | 'insider_trading' | 'coordinated_trading' | 'unusual_pattern' | 'multi_account'
+  severity: FraudFlagSeverity
+  status: FraudFlagStatus
+  evidence: Record<string, unknown>
+  risk_score: number
+  agent_finding: string
+  reviewed_by: string | null
+  reviewed_at: string | null
+  resolution: string | null
+  auto_action_taken: string | null
+  created_at: string
+}
+
+export interface ContentQueue {
+  id: string
+  content_type: ContentType
+  market_id: string | null
+  title: string
+  body: string
+  metadata: Record<string, unknown>
+  status: ContentQueueStatus
+  scheduled_publish_at: string | null
+  published_at: string | null
+  agent_task_id: string | null
+  created_at: string
+}
+
+export interface TrendCluster {
+  id: string
+  name: string
+  category: Category | 'General'
+  keywords: string[]
+  finding_ids: string[]
+  market_count: number
+  momentum_score: number
+  peak_time: string | null
+  created_at: string
+}
+
+export interface SentimentSnapshot {
+  id: string
+  category: Category | 'General'
+  sentiment_score: number
+  volume_mentions: number
+  top_entities: string[]
+  top_topics: string[]
+  data_source: string
+  created_at: string
+}
+
+export interface ModerationQueue {
+  id: string
+  item_type: 'market_candidate' | 'fraud_flag' | 'content'
+  item_id: string
+  priority: number
+  status: 'pending' | 'in_review' | 'resolved'
+  assigned_to: string | null
+  notes: string | null
+  created_at: string
+  resolved_at: string | null
+}
+
+export interface AgentConfig {
+  id: AgentType
+  name: string
+  description: string
+  emoji: string
+  enabled: boolean
+  schedule_cron: string
+  rate_limit_per_hour: number
+  confidence_threshold: number
+  max_retries: number
+  timeout_ms: number
+  last_run_at: string | null
+  total_tasks: number
+  success_rate: number
+}

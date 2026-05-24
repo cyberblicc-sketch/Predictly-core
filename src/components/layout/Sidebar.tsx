@@ -7,32 +7,68 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { mockUser } from '@/lib/mockData'
 import {
-  LayoutDashboard, TrendingUp, Briefcase, User, Trophy,
+  TrendingUp, Briefcase, User, Trophy,
   Gift, History, ChevronLeft, ChevronRight, Shield, Crown,
-  BookmarkPlus, Tag, BookOpen, ShieldCheck,
+  BookmarkPlus, Tag, BookOpen, ShieldCheck, ChevronDown,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
 }
 
-const navItems = [
-  { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/markets',    icon: TrendingUp,      label: 'Markets' },
-  { href: '/playbooks',  icon: BookOpen,        label: 'Playbooks' },
-  { href: '/portfolio',  icon: Briefcase,       label: 'Portfolio' },
-  { href: '/insurance',  icon: ShieldCheck,     label: 'Insurance' },
-  { href: '/watchlist',  icon: BookmarkPlus,    label: 'Watchlist' },
-  { href: '/history',    icon: History,         label: 'History' },
-  { href: '/leaderboard',icon: Trophy,          label: 'Leaderboard' },
-  { href: '/promotions', icon: Tag,             label: 'Promotions' },
-  { href: '/referrals',  icon: Gift,            label: 'Referrals' },
-  { href: '/profile',    icon: User,            label: 'Profile' },
+interface NavItem {
+  href: string
+  icon: LucideIcon
+  label: string
+}
+
+interface NavSection {
+  label: string
+  items: NavItem[]
+}
+
+const navSections: NavSection[] = [
+  {
+    label: 'Trade',
+    items: [
+      { href: '/markets',   icon: TrendingUp,   label: 'Markets' },
+      { href: '/playbooks', icon: BookOpen,     label: 'Playbooks' },
+      { href: '/watchlist', icon: BookmarkPlus,  label: 'Watchlist' },
+    ],
+  },
+  {
+    label: 'Portfolio',
+    items: [
+      { href: '/portfolio',  icon: Briefcase,    label: 'Overview' },
+      { href: '/insurance',  icon: ShieldCheck,  label: 'Insurance' },
+      { href: '/history',    icon: History,       label: 'History' },
+    ],
+  },
+  {
+    label: 'Community',
+    items: [
+      { href: '/leaderboard', icon: Trophy,       label: 'Leaderboard' },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { href: '/promotions', icon: Tag,           label: 'Promotions' },
+      { href: '/referrals',  icon: Gift,          label: 'Referrals' },
+      { href: '/profile',    icon: User,          label: 'Profile' },
+    ],
+  },
 ]
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
+  const [collapsedSections, setCollapsedSections] = React.useState<Record<string, boolean>>({})
+
+  const toggleSection = (label: string) => {
+    setCollapsedSections((prev) => ({ ...prev, [label]: !prev[label] }))
+  }
 
   return (
     <aside
@@ -65,44 +101,121 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+        {navSections.map((section) => {
+          const isSectionCollapsed = collapsedSections[section.label] ?? false
+          const sectionHasActive = section.items.some(
+            (item) => pathname === item.href || pathname.startsWith(item.href + '/')
+          )
+
           return (
-            <Link key={item.href} href={item.href}>
-              <motion.div
-                whileHover={{ x: 2 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
-                  isActive
-                    ? 'bg-brand-soft text-brand-hover'
-                    : 'text-fg-muted hover:text-fg hover:bg-bg-elevated',
-                  collapsed && 'justify-center px-0'
-                )}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="sidebar-active-indicator"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-brand"
-                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <item.icon className="w-5 h-5 shrink-0" />
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
+            <div key={section.label}>
+              {/* Section header */}
+              <AnimatePresence mode="wait">
+                {!collapsed && (
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    onClick={() => toggleSection(section.label)}
+                    className={cn(
+                      'flex items-center justify-between w-full px-3 py-2 rounded-lg text-2xs font-semibold uppercase tracking-wider transition-colors',
+                      sectionHasActive ? 'text-brand-hover' : 'text-fg-subtle hover:text-fg-muted'
+                    )}
+                  >
+                    <span>{section.label}</span>
+                    <motion.div
+                      animate={{ rotate: isSectionCollapsed ? -90 : 0 }}
                       transition={{ duration: 0.2 }}
-                      className="overflow-hidden whitespace-nowrap"
                     >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </Link>
+                      <ChevronDown className="h-3 w-3" />
+                    </motion.div>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              {/* Collapsed mode: show only icons with a thin divider line */}
+              {collapsed && (
+                <>
+                  <div className="my-2 mx-2 border-t border-border/50" />
+                  {section.items.map((item) => {
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                    return (
+                      <Link key={item.href} href={item.href}>
+                        <motion.div
+                          whileHover={{ x: 2 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={cn(
+                            'flex items-center justify-center px-0 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+                            isActive
+                              ? 'bg-brand-soft text-brand-hover'
+                              : 'text-fg-muted hover:text-fg hover:bg-bg-elevated'
+                          )}
+                        >
+                          {isActive && (
+                            <motion.div
+                              layoutId="sidebar-active-indicator"
+                              className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-brand"
+                              transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                            />
+                          )}
+                          <item.icon className="w-5 h-5 shrink-0" />
+                        </motion.div>
+                      </Link>
+                    )
+                  })}
+                </>
+              )}
+
+              {/* Expanded mode: section items with labels */}
+              <AnimatePresence>
+                {!collapsed && !isSectionCollapsed && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    {section.items.map((item) => {
+                      const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                      return (
+                        <Link key={item.href} href={item.href}>
+                          <motion.div
+                            whileHover={{ x: 2 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={cn(
+                              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative',
+                              isActive
+                                ? 'bg-brand-soft text-brand-hover'
+                                : 'text-fg-muted hover:text-fg hover:bg-bg-elevated'
+                            )}
+                          >
+                            {isActive && (
+                              <motion.div
+                                layoutId="sidebar-active-indicator"
+                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-brand"
+                                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                              />
+                            )}
+                            <item.icon className="w-5 h-5 shrink-0" />
+                            <motion.span
+                              initial={{ opacity: 0, width: 0 }}
+                              animate={{ opacity: 1, width: 'auto' }}
+                              exit={{ opacity: 0, width: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden whitespace-nowrap"
+                            >
+                              {item.label}
+                            </motion.span>
+                          </motion.div>
+                        </Link>
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )
         })}
       </nav>

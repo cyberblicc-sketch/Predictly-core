@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { mockUser } from '@/lib/mockData'
 import {
-  LayoutDashboard, TrendingUp, Briefcase, User, Trophy,
-  Gift, History, Shield, Wallet, Coins, Gem, Crown, Plus,
+  TrendingUp, Briefcase, User, Trophy,
+  Gift, History, Shield, Coins, Gem, Crown, Plus,
   BookmarkPlus, Tag, BookOpen, ShieldCheck,
 } from 'lucide-react'
 import {
@@ -16,6 +16,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet'
+import type { LucideIcon } from 'lucide-react'
 
 interface MobileNavProps {
   open: boolean
@@ -23,19 +24,49 @@ interface MobileNavProps {
   onDeposit?: () => void
 }
 
-const navItems = [
-  { href: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/markets',    icon: TrendingUp,      label: 'Markets' },
-  { href: '/playbooks',  icon: BookOpen,        label: 'Playbooks' },
-  { href: '/portfolio',  icon: Briefcase,       label: 'Portfolio' },
-  { href: '/insurance',  icon: ShieldCheck,     label: 'Insurance' },
-  { href: '/watchlist',  icon: BookmarkPlus,    label: 'Watchlist' },
-  { href: '/leaderboard',icon: Trophy,          label: 'Leaderboard' },
-  { href: '/promotions', icon: Tag,             label: 'Promotions' },
-  { href: '/referrals',  icon: Gift,            label: 'Referrals' },
-  { href: '/history',    icon: History,         label: 'History' },
-  { href: '/profile',    icon: User,            label: 'Profile' },
-  { href: '/kyc',        icon: Shield,          label: 'KYC' },
+interface NavItem {
+  href: string
+  icon: LucideIcon
+  label: string
+}
+
+interface NavSection {
+  label: string
+  items: NavItem[]
+}
+
+const navSections: NavSection[] = [
+  {
+    label: 'Trade',
+    items: [
+      { href: '/markets',   icon: TrendingUp,   label: 'Markets' },
+      { href: '/playbooks', icon: BookOpen,     label: 'Playbooks' },
+      { href: '/watchlist', icon: BookmarkPlus,  label: 'Watchlist' },
+    ],
+  },
+  {
+    label: 'Portfolio',
+    items: [
+      { href: '/portfolio',  icon: Briefcase,    label: 'Overview' },
+      { href: '/insurance',  icon: ShieldCheck,  label: 'Insurance' },
+      { href: '/history',    icon: History,       label: 'History' },
+    ],
+  },
+  {
+    label: 'Community',
+    items: [
+      { href: '/leaderboard', icon: Trophy,       label: 'Leaderboard' },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { href: '/promotions', icon: Tag,           label: 'Promotions' },
+      { href: '/referrals',  icon: Gift,          label: 'Referrals' },
+      { href: '/profile',    icon: User,          label: 'Profile' },
+      { href: '/kyc',        icon: Shield,        label: 'KYC' },
+    ],
+  },
 ]
 
 export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
@@ -93,27 +124,44 @@ export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
           </div>
         </div>
 
-        {/* Navigation links */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-320px)]">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-brand-soft text-brand-hover'
-                    : 'text-fg-muted hover:text-fg hover:bg-bg-elevated'
-                )}
-              >
-                <item.icon className="w-5 h-5 shrink-0" />
-                {item.label}
-              </Link>
-            )
-          })}
+        {/* Navigation links grouped by section */}
+        <nav className="flex-1 p-3 overflow-y-auto max-h-[calc(100vh-320px)]">
+          {navSections.map((section, sectionIdx) => (
+            <div key={section.label}>
+              {/* Section label */}
+              <div className="px-3 pt-3 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-fg-subtle">
+                {section.label}
+              </div>
+
+              {/* Section items */}
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-brand-soft text-brand-hover'
+                          : 'text-fg-muted hover:text-fg hover:bg-bg-elevated'
+                      )}
+                    >
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      {item.label}
+                    </Link>
+                  )
+                })}
+              </div>
+
+              {/* Divider between sections (except after last) */}
+              {sectionIdx < navSections.length - 1 && (
+                <div className="my-2 mx-3 border-t border-border/50" />
+              )}
+            </div>
+          ))}
         </nav>
 
         {/* Deposit button at bottom */}

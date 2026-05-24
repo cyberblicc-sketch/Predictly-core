@@ -17,6 +17,8 @@ import {
   RadioTower,
   Zap,
   Rocket,
+  Bot,
+  Droplets,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -26,9 +28,11 @@ const adminNavItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
   { href: '/admin/users', icon: Users, label: 'Users' },
   { href: '/admin/markets', icon: TrendingUp, label: 'Markets' },
+  { href: '/admin/ai-employees', icon: Bot, label: 'AI Employees' },
   { href: '/admin/maas', icon: Zap, label: 'MaaS' },
   { href: '/admin/wisdom-feed', icon: RadioTower, label: 'Wisdom Feed' },
   { href: '/admin/boosted', icon: Rocket, label: 'Boosted Markets' },
+  { href: '/admin/pool-solvency', icon: Droplets, label: 'Pool Solvency' },
   { href: '/admin/disputes', icon: AlertTriangle, label: 'Disputes' },
   { href: '/admin/logs', icon: ScrollText, label: 'Logs' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
@@ -212,6 +216,24 @@ export default function AdminLayout({
               )}
             >
               <Rocket className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/admin/ai-employees"
+              className={cn(
+                'p-2 rounded-lg text-xs',
+                pathname.startsWith('/admin/ai-employees') ? 'bg-brand-soft text-brand' : 'text-fg-muted'
+              )}
+            >
+              <Bot className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/admin/pool-solvency"
+              className={cn(
+                'p-2 rounded-lg text-xs',
+                pathname.startsWith('/admin/pool-solvency') ? 'bg-brand-soft text-brand' : 'text-fg-muted'
+              )}
+            >
+              <Droplets className="h-4 w-4" />
             </Link>
             <Link
               href="/admin/settings"

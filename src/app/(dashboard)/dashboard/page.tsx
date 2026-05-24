@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import {
   TrendingUp, Wallet, Coins, Gem, ArrowUpRight, ArrowDownRight,
-  ArrowRight, Activity,
+  ArrowRight, Activity, BookOpen, ShieldCheck, ArrowDownToLine,
+  TrendingDown,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { portfolio, portfolioHistory, markets, transactions, mockUser } from '@/lib/mockData'
-import { MarketCard } from '@/components/market/MarketCard'
 import { PositionCard } from '@/components/portfolio/PositionCard'
 import { formatUSD, formatCompact, formatDate, cn } from '@/lib/utils'
 
@@ -20,6 +20,7 @@ export default function DashboardPage() {
     ? portfolioHistory[portfolioHistory.length - 1].value >= portfolioHistory[0].value
     : true
   const chartColor = chartTrendUp ? '#00D284' : '#FF4D6D'
+  const trendingMarkets = markets.filter((m) => m.trending).slice(0, 3)
 
   return (
     <div className="space-y-6">
@@ -105,10 +106,52 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Active Positions (first 3) */}
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/markets"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)]"
+          >
+            <TrendingUp className="h-4 w-4" />
+            Browse Markets
+          </Link>
+          <Link
+            href="/portfolio"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-bg-subtle border border-border hover:border-border-strong text-fg text-sm font-semibold transition-colors"
+          >
+            <Wallet className="h-4 w-4" />
+            View Portfolio
+          </Link>
+          <Link
+            href="/portfolio?tab=withdraw"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-bg-subtle border border-border hover:border-border-strong text-fg text-sm font-semibold transition-colors"
+          >
+            <ArrowDownToLine className="h-4 w-4" />
+            Withdraw
+          </Link>
+          <Link
+            href="/insurance"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 text-sm font-semibold transition-colors"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Get Insurance
+          </Link>
+          <Link
+            href="/playbooks"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-bg-subtle border border-border hover:border-border-strong text-fg text-sm font-semibold transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            Playbooks
+          </Link>
+        </div>
+      </div>
+
+      {/* Your Positions (first 3) */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Active Positions</h2>
+          <h2 className="text-lg font-semibold">Your Positions</h2>
           <Link href="/portfolio" className="text-sm text-brand hover:text-brand-hover flex items-center gap-1 transition-colors">
             View all <ArrowRight className="h-3.5 w-3.5" />
           </Link>
@@ -120,7 +163,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Trending Markets (grid of 3) */}
+      {/* Trending Markets */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Trending Markets</h2>
@@ -128,10 +171,45 @@ export default function DashboardPage() {
             Browse all <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {markets.filter(m => m.trending).slice(0, 3).map((m) => (
-            <MarketCard key={m.id} market={m} />
-          ))}
+        <div className="rounded-xl bg-bg-subtle border border-border overflow-hidden">
+          <ul className="divide-y divide-border">
+            {trendingMarkets.map((m) => {
+              const yesOutcome = m.outcomes[0]
+              const delta = yesOutcome?.delta7d ?? 0
+              const positive = delta >= 0
+              return (
+                <li key={m.id}>
+                  <Link
+                    href={`/markets/${m.id}`}
+                    className="flex items-center gap-4 px-4 py-3 hover:bg-bg-elevated transition-colors"
+                  >
+                    <div className={cn(
+                      'shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br flex items-center justify-center text-lg border border-border',
+                      m.imageColor
+                    )}>
+                      {m.imageEmoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{m.question}</div>
+                      <div className="text-2xs text-fg-subtle">{m.category} · {formatCompact(m.traders)} traders</div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-sm font-bold tabular-nums">
+                        {Math.round((yesOutcome?.price ?? 0) * 100)}%
+                      </div>
+                      <div className={cn(
+                        'flex items-center gap-0.5 text-2xs font-medium tabular-nums justify-end',
+                        positive ? 'text-yes' : 'text-no'
+                      )}>
+                        {positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                        {positive ? '+' : ''}{(delta * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </div>
 
