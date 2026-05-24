@@ -18,6 +18,7 @@ import type { Market, MarketOutcome } from '@/types'
 import { histories } from '@/lib/mockData'
 import { formatUSD, formatCompact, cn } from '@/lib/utils'
 import { Sparkline } from './Sparkline'
+import { BoostedBadge } from './BoostedBadge'
 
 interface MarketCardProps {
   market: Market
@@ -59,12 +60,15 @@ export function MarketCard({ market }: MarketCardProps) {
     >
       {/* Badges & Actions */}
       <div className="absolute top-3 right-3 flex gap-1.5 z-10">
-        {market.trending && (
+        {market.boosted && (
+          <BoostedBadge placement={market.boosted.placement} sponsorName={market.boosted.sponsorName} />
+        )}
+        {market.trending && !market.boosted && (
           <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full bg-no-soft border border-no-border text-no text-2xs font-medium">
             <Flame className="h-3 w-3" /> Hot
           </span>
         )}
-        {market.isNew && (
+        {market.isNew && !market.boosted && (
           <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full bg-brand-soft border border-brand/30 text-brand-hover text-2xs font-medium">
             <Sparkles className="h-3 w-3" /> New
           </span>

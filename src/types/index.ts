@@ -45,6 +45,10 @@ export interface Market {
   imageEmoji: string
   trending?: boolean
   isNew?: boolean
+  boosted?: {
+    placement: BoostPlacement
+    sponsorName: string
+  }
   status: 'active' | 'paused' | 'resolved' | 'cancelled'
   resolvedOutcome?: string
   yesPool?: number

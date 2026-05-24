@@ -42,9 +42,9 @@ export function BoostedBadge({ placement, sponsorName, className }: BoostedBadge
     <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge
+          <span
             className={cn(
-              'relative cursor-default gap-1 font-semibold text-2xs overflow-hidden',
+              'relative inline-flex items-center justify-center h-6 w-6 rounded-full cursor-default overflow-hidden',
               'animate-pulse-subtle',
               PLACEMENT_STYLES[placement],
               className
@@ -53,9 +53,8 @@ export function BoostedBadge({ placement, sponsorName, className }: BoostedBadge
             {/* Animated glow background */}
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
 
-            <Zap className="h-3 w-3 fill-current" />
-            <span className="relative">BOOSTED</span>
-          </Badge>
+            <Zap className="h-3.5 w-3.5 fill-current relative" />
+          </span>
         </TooltipTrigger>
         <TooltipContent side="top" className="text-xs">
           <div className="flex flex-col gap-1">
