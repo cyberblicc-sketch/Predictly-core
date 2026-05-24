@@ -4,7 +4,6 @@ import Link from 'next/link'
 import {
   TrendingUp, Wallet, Coins, Gem, ArrowUpRight, ArrowDownRight,
   ArrowRight, Activity, BookOpen, ShieldCheck, ArrowDownToLine,
-  TrendingDown,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -125,7 +124,7 @@ export default function DashboardPage() {
             View Portfolio
           </Link>
           <Link
-            href="/portfolio?tab=withdraw"
+            href="/withdrawal"
             className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-bg-subtle border border-border hover:border-border-strong text-fg text-sm font-semibold transition-colors"
           >
             <ArrowDownToLine className="h-4 w-4" />

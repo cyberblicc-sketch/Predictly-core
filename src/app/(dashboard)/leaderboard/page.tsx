@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import {
   Trophy, Medal, Crown, Flame, TrendingUp,
-  Whale, Crosshair, Rocket,
 } from 'lucide-react'
 import { leaderboard } from '@/lib/mockData'
 import { cn, formatUSD, formatCompact, formatPct } from '@/lib/utils'

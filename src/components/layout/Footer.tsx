@@ -19,6 +19,17 @@ const FOOTER_COLUMNS = [
       { label: 'Promotions', href: '/promotions' },
       { label: 'Leaderboard', href: '/leaderboard' },
       { label: 'Referrals', href: '/referrals' },
+      { label: 'Sponsored', href: '/sponsored' },
+    ],
+  },
+  {
+    title: 'Developers',
+    links: [
+      { label: 'API Docs', href: '/docs' },
+      { label: 'MaaS Widgets', href: '/docs' },
+      { label: 'Wisdom Feed', href: '/docs' },
+      { label: 'Withdrawal', href: '/withdrawal' },
+      { label: 'Insurance', href: '/insurance' },
     ],
   },
   {
@@ -52,7 +63,7 @@ export function Footer() {
     <footer className="border-t border-border mt-auto">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 py-10">
         {/* 5-column grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">

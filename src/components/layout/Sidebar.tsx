@@ -10,6 +10,7 @@ import {
   TrendingUp, Briefcase, User, Trophy,
   Gift, History, ChevronLeft, ChevronRight, Shield, Crown,
   BookmarkPlus, Tag, BookOpen, ShieldCheck, ChevronDown,
+  ArrowDownToLine, FileText, Zap,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -31,33 +32,37 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    label: 'Trade',
+    label: 'Trade & Explore',
     items: [
-      { href: '/markets',   icon: TrendingUp,   label: 'Markets' },
-      { href: '/playbooks', icon: BookOpen,     label: 'Playbooks' },
-      { href: '/watchlist', icon: BookmarkPlus,  label: 'Watchlist' },
+      { href: '/markets',   icon: TrendingUp,    label: 'Markets' },
+      { href: '/playbooks', icon: BookOpen,      label: 'Playbooks' },
+      { href: '/sponsored', icon: Zap,           label: 'Sponsored' },
+      { href: '/watchlist', icon: BookmarkPlus,   label: 'Watchlist' },
     ],
   },
   {
-    label: 'Portfolio',
+    label: 'My Portfolio',
     items: [
-      { href: '/portfolio',  icon: Briefcase,    label: 'Overview' },
-      { href: '/insurance',  icon: ShieldCheck,  label: 'Insurance' },
-      { href: '/history',    icon: History,       label: 'History' },
+      { href: '/portfolio',   icon: Briefcase,       label: 'Portfolio' },
+      { href: '/insurance',   icon: ShieldCheck,     label: 'Insurance' },
+      { href: '/withdrawal',  icon: ArrowDownToLine,  label: 'Withdrawal' },
+      { href: '/history',     icon: History,          label: 'History' },
     ],
   },
   {
     label: 'Community',
     items: [
-      { href: '/leaderboard', icon: Trophy,       label: 'Leaderboard' },
+      { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
+      { href: '/promotions',  icon: Tag,    label: 'Promotions' },
+      { href: '/referrals',   icon: Gift,   label: 'Referrals' },
     ],
   },
   {
-    label: 'Account',
+    label: 'Account & Resources',
     items: [
-      { href: '/promotions', icon: Tag,           label: 'Promotions' },
-      { href: '/referrals',  icon: Gift,          label: 'Referrals' },
-      { href: '/profile',    icon: User,          label: 'Profile' },
+      { href: '/profile', icon: User,     label: 'Profile' },
+      { href: '/docs',    icon: FileText, label: 'Docs' },
+      { href: '/kyc',     icon: Shield,   label: 'KYC' },
     ],
   },
 ]
@@ -79,9 +84,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     >
       {/* Logo */}
       <div className="p-4 border-b border-border">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white text-sm shrink-0">
-            PR
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center shrink-0">
+            <Zap className="h-5 w-5 text-white" />
           </div>
           <AnimatePresence>
             {!collapsed && (
@@ -90,9 +95,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
-                className="font-bold text-lg tracking-tight overflow-hidden whitespace-nowrap"
+                className="gradient-text font-extrabold text-lg tracking-tight overflow-hidden whitespace-nowrap"
               >
-                Predictly
+                PREDICTLY
               </motion.span>
             )}
           </AnimatePresence>
@@ -219,34 +224,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           )
         })}
       </nav>
-
-      {/* KYC link */}
-      <div className="px-3 pb-2">
-        <Link href="/kyc">
-          <motion.div
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.98 }}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-fg-muted hover:text-fg hover:bg-bg-elevated transition-colors',
-              collapsed && 'justify-center px-0'
-            )}
-          >
-            <Shield className="w-5 h-5 shrink-0" />
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  Verify KYC
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </Link>
-      </div>
 
       {/* User info at bottom */}
       <div className="p-3 border-t border-border">

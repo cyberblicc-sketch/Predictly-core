@@ -420,7 +420,7 @@ export function TradeForm({
         <p className="text-2xs text-fg-subtle text-center leading-relaxed">
           By trading you agree to our{' '}
           <a href="/terms" className="text-brand hover:underline">Terms of Service</a>{' '}and{' '}
-          <a href="/rules" className="text-brand hover:underline">Market Rules</a>
+          <a href="/terms" className="text-brand hover:underline">Market Rules</a>
         </p>
       </form>
     </div>

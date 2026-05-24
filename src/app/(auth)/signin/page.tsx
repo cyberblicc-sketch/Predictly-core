@@ -224,7 +224,7 @@ export default function SignInPage() {
               Remember me
             </label>
             <Link
-              href="/forgot-password"
+              href="/contact"
               className="text-brand hover:text-brand-hover transition-colors"
             >
               Forgot password?

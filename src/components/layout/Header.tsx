@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Search, Bell, Wallet, ChevronDown, Menu, User, LogOut, Settings,
-  Coins, Gem, Plus, Moon, Sun, ArrowDownToLine, BookOpen, ShieldCheck,
+  Coins, Gem, Plus, Moon, Sun, BookOpen, ShieldCheck,
+  ArrowDownToLine, FileText, Zap, Trophy, Gift, Briefcase,
+  BookmarkPlus, Tag, History, Shield, TrendingUp,
 } from 'lucide-react'
-import { cn, formatCurrency } from '@/lib/utils'
-import { mockUser } from '@/lib/mockData'
-import { markets, categories } from '@/lib/mockData'
+import { mockUser, markets, categories } from '@/lib/mockData'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,12 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import {
   CommandDialog,
   CommandEmpty,
@@ -38,11 +32,20 @@ import { MobileNav } from '@/components/layout/MobileNav'
 import { DepositModal } from '@/components/trade/DepositModal'
 
 const NAV_LINKS = [
-  { href: '/',            label: 'Markets' },
+  { href: '/markets',     label: 'Markets' },
+  { href: '/playbooks',   label: 'Playbooks' },
+  { href: '/sponsored',   label: 'Sponsored' },
   { href: '/portfolio',   label: 'Portfolio' },
+  { href: '/insurance',   label: 'Insurance' },
+  { href: '/withdrawal',  label: 'Withdrawal' },
   { href: '/watchlist',   label: 'Watchlist' },
+  { href: '/history',     label: 'History' },
   { href: '/leaderboard', label: 'Leaderboard' },
-  { href: '/promotions',  label: 'Promos' },
+  { href: '/promotions',  label: 'Promotions' },
+  { href: '/referrals',   label: 'Referrals' },
+  { href: '/profile',     label: 'Profile' },
+  { href: '/docs',        label: 'Docs' },
+  { href: '/kyc',         label: 'KYC' },
 ]
 
 const gcBalance = mockUser.gold_balance
@@ -55,9 +58,6 @@ export function Header() {
   const [isDark, setIsDark] = useState(true)
   const [commandOpen, setCommandOpen] = useState(false)
   const [depositOpen, setDepositOpen] = useState(false)
-
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' || pathname.startsWith('/markets') : pathname.startsWith(href)
 
   // ⌘K shortcut to open command palette
   useEffect(() => {
@@ -80,61 +80,60 @@ export function Header() {
     <>
       <header className="sticky top-0 z-40 glass border-b border-border">
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
-          <div className="flex h-16 items-center gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white text-sm">
-                PR
-                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-yes" />
-              </div>
-              <span className="font-semibold text-lg tracking-tight hidden sm:inline">
-                Predictly
+          <div className="flex h-16 items-center justify-between gap-3">
+
+            {/* ── Left: Brand name hero ── */}
+            <Link href="/" className="shrink-0 group">
+              <span className="gradient-text text-2xl sm:text-3xl font-extrabold tracking-tight transition-opacity group-hover:opacity-80">
+                PREDICTLY
               </span>
             </Link>
 
-            {/* Search — desktop */}
-            <div className="hidden md:flex flex-1 max-w-xl">
+            {/* ── Right cluster ── */}
+            <div className="flex items-center gap-2">
+
+              {/* Search icon button (⌘K) */}
               <button
                 type="button"
                 onClick={() => setCommandOpen(true)}
-                className="relative w-full flex items-center h-10 pl-10 pr-12 rounded-lg bg-bg-subtle border border-border hover:border-border-strong focus:border-brand text-sm text-fg-subtle transition-colors text-left"
+                className="relative h-10 w-10 rounded-lg bg-bg-subtle border border-border hover:border-border-strong flex items-center justify-center transition-all hover:bg-bg-elevated"
+                aria-label="Search markets (⌘K)"
               >
-                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fg-subtle" />
-                <span className="text-fg-subtle">Search markets, traders, topics...</span>
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-2xs text-fg-subtle border border-border rounded px-1.5 py-0.5 font-mono">⌘K</kbd>
+                <Search className="h-[18px] w-[18px] text-fg-muted" />
+                <kbd className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] text-fg-subtle border border-border rounded px-1 py-px font-mono leading-none bg-bg-subtle">
+                  ⌘K
+                </kbd>
               </button>
-            </div>
 
-            {/* Nav links — desktop */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    isActive(link.href)
-                      ? 'text-fg bg-bg-elevated'
-                      : 'text-fg-muted hover:text-fg hover:bg-bg-subtle'
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+              {/* ── Logged-out: Login & Sign Up ── */}
+              {false && ( /* placeholder — remove `false &&` to show logged-out state */
+                <>
+                  <Link
+                    href="/signin"
+                    className="h-10 px-4 rounded-lg border border-border hover:border-border-strong text-sm font-medium text-fg-muted hover:text-fg transition-all flex items-center"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] flex items-center"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
 
-            {/* Right cluster */}
-            <div className="flex items-center gap-2 ml-auto lg:ml-0">
+              {/* ── Logged-in: compact cluster ── */}
               {/* Dual-currency wallet dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="hidden sm:flex items-center gap-2 h-10 px-3 rounded-lg bg-bg-subtle border border-border hover:border-border-strong transition-colors">
+                  <button className="hidden sm:flex items-center gap-1.5 h-10 px-3 rounded-lg bg-bg-subtle border border-border hover:border-border-strong transition-colors">
                     <Coins className="h-4 w-4 text-gold" />
-                    <span className="text-sm font-semibold tabular-nums text-gold">{gcBalance.toLocaleString()} GC</span>
-                    <span className="text-border-strong">|</span>
+                    <span className="text-sm font-semibold tabular-nums text-gold">{gcBalance.toLocaleString()}</span>
+                    <span className="text-border-strong mx-0.5">|</span>
                     <Gem className="h-3.5 w-3.5 text-sweeps" />
-                    <span className="text-sm font-semibold tabular-nums text-sweeps">{scBalance.toLocaleString()} SC</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-fg-subtle" />
+                    <span className="text-sm font-semibold tabular-nums text-sweeps">{scBalance.toLocaleString()}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-fg-subtle ml-0.5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64">
@@ -191,7 +190,7 @@ export function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="relative h-10 w-10 rounded-lg bg-bg-subtle border border-border hover:border-border-strong flex items-center justify-center transition-colors">
-                    <Bell className="h-4 w-4 text-fg-muted" />
+                    <Bell className="h-[18px] w-[18px] text-fg-muted" />
                     <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-no">
                       <span className="absolute inset-0 rounded-full bg-no animate-ping opacity-75" />
                     </span>
@@ -217,32 +216,19 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Theme toggle */}
-              <button
-                onClick={() => {
-                  const next = !isDark
-                  setIsDark(next)
-                  document.documentElement.classList.toggle('light', !next)
-                }}
-                className="h-10 w-10 rounded-lg bg-bg-subtle border border-border hover:border-border-strong flex items-center justify-center transition-colors"
-                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {isDark ? <Moon className="h-4 w-4 text-fg-muted" /> : <Sun className="h-4 w-4 text-gold" />}
-              </button>
-
               {/* Deposit button */}
-              <button 
+              <button
                 onClick={() => setDepositOpen(true)}
-                className="hidden sm:inline-flex h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)]"
+                className="hidden sm:inline-flex h-10 px-4 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] items-center gap-1.5"
               >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Deposit
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline">Deposit</span>
               </button>
 
-              {/* User avatar */}
+              {/* User avatar dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="hidden sm:flex h-9 w-9 rounded-full bg-gradient-to-br from-brand to-yes items-center justify-center text-sm font-semibold border border-border hover:border-border-strong transition-colors">
+                  <button className="h-9 w-9 rounded-full bg-gradient-to-br from-brand to-yes items-center justify-center text-sm font-semibold border border-border hover:border-border-strong transition-colors flex">
                     {mockUser.username.charAt(0)}
                   </button>
                 </DropdownMenuTrigger>
@@ -269,8 +255,8 @@ export function Header() {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    variant="destructive" 
+                  <DropdownMenuItem
+                    variant="destructive"
                     className="cursor-pointer"
                     onClick={async () => {
                       try {
@@ -288,13 +274,13 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Mobile hamburger menu */}
+              {/* ── Hamburger menu — visible on ALL screen sizes ── */}
               <button
-                className="lg:hidden h-10 w-10 rounded-lg bg-bg-subtle border border-border flex items-center justify-center hover:border-border-strong transition-colors"
+                className="h-10 w-10 rounded-lg bg-bg-subtle border border-border hover:border-border-strong hover:bg-bg-elevated flex items-center justify-center transition-all active:scale-95"
                 onClick={() => setMobileNavOpen(true)}
                 aria-label="Open navigation menu"
               >
-                <Menu className="h-4 w-4" />
+                <Menu className="h-5 w-5 text-fg-muted" />
               </button>
             </div>
           </div>
@@ -309,38 +295,47 @@ export function Header() {
 
           {/* Pages */}
           <CommandGroup heading="Pages">
-            {NAV_LINKS.map((link) => (
-              <CommandItem
-                key={link.href}
-                onSelect={() => runCommand(() => router.push(link.href))}
-              >
-                <Search className="mr-2 h-4 w-4" />
-                {link.label}
-              </CommandItem>
-            ))}
-            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard'))}>
-              <Search className="mr-2 h-4 w-4" />
-              Dashboard
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => router.push('/history'))}>
-              <Search className="mr-2 h-4 w-4" />
-              Transaction History
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => router.push('/referrals'))}>
-              <Search className="mr-2 h-4 w-4" />
-              Referrals
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => router.push('/kyc'))}>
-              <Search className="mr-2 h-4 w-4" />
-              KYC Verification
+            <CommandItem onSelect={() => runCommand(() => router.push('/markets'))}>
+              <TrendingUp className="mr-2 h-4 w-4" /> Markets
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => router.push('/playbooks'))}>
-              <BookOpen className="mr-2 h-4 w-4" />
-              Playbooks Marketplace
+              <BookOpen className="mr-2 h-4 w-4" /> Playbooks
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/sponsored'))}>
+              <Zap className="mr-2 h-4 w-4" /> Sponsored
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/portfolio'))}>
+              <Briefcase className="mr-2 h-4 w-4" /> Portfolio
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => router.push('/insurance'))}>
-              <ShieldCheck className="mr-2 h-4 w-4" />
-              Position Insurance
+              <ShieldCheck className="mr-2 h-4 w-4" /> Insurance
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/withdrawal'))}>
+              <ArrowDownToLine className="mr-2 h-4 w-4" /> Withdrawal
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/watchlist'))}>
+              <BookmarkPlus className="mr-2 h-4 w-4" /> Watchlist
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/history'))}>
+              <History className="mr-2 h-4 w-4" /> History
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/leaderboard'))}>
+              <Trophy className="mr-2 h-4 w-4" /> Leaderboard
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/promotions'))}>
+              <Tag className="mr-2 h-4 w-4" /> Promotions
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/referrals'))}>
+              <Gift className="mr-2 h-4 w-4" /> Referrals
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/profile'))}>
+              <User className="mr-2 h-4 w-4" /> Profile
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/docs'))}>
+              <FileText className="mr-2 h-4 w-4" /> Docs
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/kyc'))}>
+              <Shield className="mr-2 h-4 w-4" /> KYC
             </CommandItem>
           </CommandGroup>
 
@@ -379,7 +374,7 @@ export function Header() {
         </CommandList>
       </CommandDialog>
 
-      {/* Mobile navigation drawer */}
+      {/* Mobile navigation drawer — accessible from hamburger on all screen sizes */}
       <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} onDeposit={() => { setMobileNavOpen(false); setDepositOpen(true) }} />
 
       {/* Deposit modal */}

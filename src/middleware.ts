@@ -19,6 +19,9 @@ const PROTECTED_ROUTES = [
   '/kyc',
   '/promotions',
   '/watchlist',
+  '/withdrawal',
+  '/sponsored',
+  '/docs',
 ]
 
 const ADMIN_ROUTES = ['/admin']

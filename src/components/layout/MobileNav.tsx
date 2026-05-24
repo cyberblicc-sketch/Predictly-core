@@ -8,6 +8,7 @@ import {
   TrendingUp, Briefcase, User, Trophy,
   Gift, History, Shield, Coins, Gem, Crown, Plus,
   BookmarkPlus, Tag, BookOpen, ShieldCheck,
+  ArrowDownToLine, FileText, Zap, X,
 } from 'lucide-react'
 import {
   Sheet,
@@ -15,6 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetClose,
 } from '@/components/ui/sheet'
 import type { LucideIcon } from 'lucide-react'
 
@@ -37,34 +39,37 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    label: 'Trade',
+    label: 'Trade & Explore',
     items: [
       { href: '/markets',   icon: TrendingUp,   label: 'Markets' },
       { href: '/playbooks', icon: BookOpen,     label: 'Playbooks' },
+      { href: '/sponsored', icon: Zap,          label: 'Sponsored' },
       { href: '/watchlist', icon: BookmarkPlus,  label: 'Watchlist' },
     ],
   },
   {
-    label: 'Portfolio',
+    label: 'My Portfolio',
     items: [
-      { href: '/portfolio',  icon: Briefcase,    label: 'Overview' },
-      { href: '/insurance',  icon: ShieldCheck,  label: 'Insurance' },
-      { href: '/history',    icon: History,       label: 'History' },
+      { href: '/portfolio',    icon: Briefcase,      label: 'Portfolio' },
+      { href: '/insurance',    icon: ShieldCheck,    label: 'Insurance' },
+      { href: '/withdrawal',   icon: ArrowDownToLine, label: 'Withdrawal' },
+      { href: '/history',      icon: History,        label: 'History' },
     ],
   },
   {
     label: 'Community',
     items: [
-      { href: '/leaderboard', icon: Trophy,       label: 'Leaderboard' },
+      { href: '/leaderboard',  icon: Trophy,  label: 'Leaderboard' },
+      { href: '/promotions',   icon: Tag,     label: 'Promotions' },
+      { href: '/referrals',    icon: Gift,    label: 'Referrals' },
     ],
   },
   {
-    label: 'Account',
+    label: 'Account & Resources',
     items: [
-      { href: '/promotions', icon: Tag,           label: 'Promotions' },
-      { href: '/referrals',  icon: Gift,          label: 'Referrals' },
-      { href: '/profile',    icon: User,          label: 'Profile' },
-      { href: '/kyc',        icon: Shield,        label: 'KYC' },
+      { href: '/profile', icon: User,     label: 'Profile' },
+      { href: '/docs',    icon: FileText, label: 'Docs' },
+      { href: '/kyc',     icon: Shield,   label: 'KYC Verification' },
     ],
   },
 ]
@@ -74,22 +79,30 @@ export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <SheetContent side="left" className="w-72 p-0 bg-bg-subtle border-r border-border">
-        {/* Header with logo */}
-        <SheetHeader className="p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-yes flex items-center justify-center font-bold text-white text-sm">
-              PR
-            </div>
-            <SheetTitle className="font-bold text-lg">Predictly</SheetTitle>
+      <SheetContent side="right" className="w-80 p-0 bg-bg-subtle border-l border-border flex flex-col">
+        {/* ── Header: PREDICTLY gradient + close ── */}
+        <SheetHeader className="p-5 border-b border-border">
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-brand to-yes bg-clip-text text-transparent">
+              PREDICTLY
+            </span>
+            <SheetClose asChild>
+              <button
+                aria-label="Close navigation"
+                className="h-8 w-8 rounded-full flex items-center justify-center text-fg-muted hover:text-fg hover:bg-bg-elevated transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </SheetClose>
           </div>
-          <SheetDescription className="sr-only">Navigation menu</SheetDescription>
+          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+          <SheetDescription className="sr-only">Navigate to different sections of Predictly</SheetDescription>
         </SheetHeader>
 
-        {/* User info section */}
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand to-yes flex items-center justify-center text-sm font-bold text-white shrink-0">
+        {/* ── User info section ── */}
+        <div className="p-5 border-b border-border">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-brand to-yes flex items-center justify-center text-sm font-bold text-white shrink-0">
               {mockUser.username.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -124,12 +137,12 @@ export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
           </div>
         </div>
 
-        {/* Navigation links grouped by section */}
-        <nav className="flex-1 p-3 overflow-y-auto max-h-[calc(100vh-320px)]">
+        {/* ── Navigation links grouped by section ── */}
+        <nav className="flex-1 overflow-y-auto py-3 px-3 max-h-[calc(100vh-340px)]">
           {navSections.map((section, sectionIdx) => (
             <div key={section.label}>
               {/* Section label */}
-              <div className="px-3 pt-3 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-fg-subtle">
+              <div className="px-3 pt-4 pb-2 text-2xs font-semibold uppercase tracking-wider text-fg-subtle">
                 {section.label}
               </div>
 
@@ -143,13 +156,16 @@ export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
                         isActive
                           ? 'bg-brand-soft text-brand-hover'
-                          : 'text-fg-muted hover:text-fg hover:bg-bg-elevated'
+                          : 'text-fg-muted hover:text-fg hover:bg-bg-elevated active:scale-[0.98]'
                       )}
                     >
-                      <item.icon className="w-5 h-5 shrink-0" />
+                      <item.icon className={cn(
+                        'w-5 h-5 shrink-0 transition-colors',
+                        isActive ? 'text-brand' : 'text-fg-subtle'
+                      )} />
                       {item.label}
                     </Link>
                   )
@@ -158,17 +174,17 @@ export function MobileNav({ open, onClose, onDeposit }: MobileNavProps) {
 
               {/* Divider between sections (except after last) */}
               {sectionIdx < navSections.length - 1 && (
-                <div className="my-2 mx-3 border-t border-border/50" />
+                <div className="my-3 mx-3 border-t border-border/50" />
               )}
             </div>
           ))}
         </nav>
 
-        {/* Deposit button at bottom */}
-        <div className="p-4 border-t border-border">
-          <button 
+        {/* ── Deposit button at bottom ── */}
+        <div className="p-4 border-t border-border mt-auto">
+          <button
             onClick={onDeposit}
-            className="w-full h-11 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 text-white text-sm font-semibold transition-opacity shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] flex items-center justify-center gap-2"
+            className="w-full h-11 rounded-lg bg-gradient-to-r from-brand to-brand-hover hover:opacity-90 active:scale-[0.98] text-white text-sm font-semibold transition-all shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] flex items-center justify-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Deposit
