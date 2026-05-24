@@ -14,6 +14,9 @@ import {
   LogOut,
   Shield,
   Loader2,
+  RadioTower,
+  Zap,
+  Rocket,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -23,6 +26,9 @@ const adminNavItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
   { href: '/admin/users', icon: Users, label: 'Users' },
   { href: '/admin/markets', icon: TrendingUp, label: 'Markets' },
+  { href: '/admin/maas', icon: Zap, label: 'MaaS' },
+  { href: '/admin/wisdom-feed', icon: RadioTower, label: 'Wisdom Feed' },
+  { href: '/admin/boosted', icon: Rocket, label: 'Boosted Markets' },
   { href: '/admin/disputes', icon: AlertTriangle, label: 'Disputes' },
   { href: '/admin/logs', icon: ScrollText, label: 'Logs' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
@@ -179,6 +185,33 @@ export default function AdminLayout({
               )}
             >
               <TrendingUp className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/admin/maas"
+              className={cn(
+                'p-2 rounded-lg text-xs',
+                pathname.startsWith('/admin/maas') ? 'bg-brand-soft text-brand' : 'text-fg-muted'
+              )}
+            >
+              <Zap className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/admin/wisdom-feed"
+              className={cn(
+                'p-2 rounded-lg text-xs',
+                pathname.startsWith('/admin/wisdom-feed') ? 'bg-brand-soft text-brand' : 'text-fg-muted'
+              )}
+            >
+              <RadioTower className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/admin/boosted"
+              className={cn(
+                'p-2 rounded-lg text-xs',
+                pathname.startsWith('/admin/boosted') ? 'bg-brand-soft text-brand' : 'text-fg-muted'
+              )}
+            >
+              <Rocket className="h-4 w-4" />
             </Link>
             <Link
               href="/admin/settings"

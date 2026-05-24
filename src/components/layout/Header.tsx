@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Search, Bell, Wallet, ChevronDown, Menu, User, LogOut, Settings,
-  Coins, Gem, Plus, Moon, Sun,
+  Coins, Gem, Plus, Moon, Sun, ArrowDownToLine, BookOpen, ShieldCheck,
 } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { mockUser } from '@/lib/mockData'
@@ -171,6 +171,18 @@ export function Header() {
                         Transaction History
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/insurance" className="cursor-pointer">
+                        <ShieldCheck className="h-4 w-4" />
+                        Position Insurance
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/playbooks" className="cursor-pointer">
+                        <BookOpen className="h-4 w-4" />
+                        Playbooks Marketplace
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -321,6 +333,14 @@ export function Header() {
             <CommandItem onSelect={() => runCommand(() => router.push('/kyc'))}>
               <Search className="mr-2 h-4 w-4" />
               KYC Verification
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/playbooks'))}>
+              <BookOpen className="mr-2 h-4 w-4" />
+              Playbooks Marketplace
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push('/insurance'))}>
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Position Insurance
             </CommandItem>
           </CommandGroup>
 

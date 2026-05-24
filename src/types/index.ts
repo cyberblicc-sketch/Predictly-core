@@ -275,3 +275,324 @@ export interface GCPackage {
 export interface GCPackages {
   [key in GCPackageId]: GCPackage
 }
+
+// --- Boosted Markets types ---
+
+export type BoostStatus = 'pending' | 'active' | 'paused' | 'completed' | 'rejected'
+export type BoostPlacement = 'hero' | 'featured' | 'category_top' | 'sidebar' | 'ticker'
+
+export interface BoostedMarket {
+  id: string
+  market_id: string
+  market_title: string
+  market_emoji: string
+  sponsor_name: string
+  sponsor_logo_url: string | null
+  placement: BoostPlacement
+  status: BoostStatus
+  budget: number
+  spent: number
+  impressions: number
+  clicks: number
+  ctr: number
+  additional_liquidity: number
+  start_date: string
+  end_date: string
+  cpc: number
+  target_categories: string[]
+  created_at: string
+}
+
+// --- Withdrawal Speed types ---
+
+export type WithdrawalSpeed = 'instant' | 'standard' | 'scheduled'
+export type WithdrawalStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+
+export interface WithdrawalFeeQuote {
+  amount: number
+  currency: 'SC'
+  speed: WithdrawalSpeed
+  fee: number
+  fee_pct: number
+  net_amount: number
+  estimated_arrival: string
+  fee_breakdown: {
+    base_fee: number
+    speed_fee: number
+    risk_fee: number
+    total_fee: number
+  }
+}
+
+export interface WithdrawalRequest {
+  id: string
+  user_id: string
+  amount: number
+  currency: 'SC'
+  speed: WithdrawalSpeed
+  fee: number
+  net_amount: number
+  status: WithdrawalStatus
+  destination: string
+  destination_type: 'bank_account' | 'crypto_wallet'
+  estimated_arrival: string
+  created_at: string
+  processed_at: string | null
+}
+
+// --- Insurance/Hedging types ---
+
+export type InsuranceStatus = 'active' | 'expired' | 'claimed' | 'cancelled'
+export type InsuranceType = 'full_hedge' | 'partial_hedge' | 'stop_loss'
+
+export interface InsurancePolicy {
+  id: string
+  user_id: string
+  position_id: string
+  market_id: string
+  market_title: string
+  insurance_type: InsuranceType
+  coverage_pct: number
+  position_value: number
+  coverage_amount: number
+  premium: number
+  premium_pct: number
+  trigger_price: number
+  current_price: number
+  status: InsuranceStatus
+  expires_at: string
+  created_at: string
+  claimed_at: string | null
+  payout: number | null
+}
+
+export interface InsuranceQuote {
+  position_id: string
+  market_id: string
+  position_value: number
+  insurance_type: InsuranceType
+  coverage_pct: number
+  premium: number
+  premium_pct: number
+  trigger_price: number
+  coverage_amount: number
+  expires_in_days: number
+  risk_score: number
+  recommendation: string
+}
+
+// --- Playbooks Marketplace types ---
+
+export type PlaybookStatus = 'active' | 'paused' | 'archived'
+export type PlaybookTier = 'free' | 'basic' | 'premium' | 'elite'
+
+export interface Playbook {
+  id: string
+  creator_id: string
+  creator_username: string
+  creator_avatar: string
+  creator_badge?: 'whale' | 'sharp' | 'rising' | 'verified'
+  title: string
+  description: string
+  cover_color: string
+  cover_emoji: string
+  category: Category
+  tier: PlaybookTier
+  price_monthly: number
+  subscriber_count: number
+  max_subscribers: number | null
+  rating: number
+  rating_count: number
+  total_posts: number
+  open_positions: number
+  win_rate: number
+  avg_return: number
+  status: PlaybookStatus
+  tags: string[]
+  featured: boolean
+  created_at: string
+  last_post_at: string
+}
+
+export interface PlaybookPost {
+  id: string
+  playbook_id: string
+  title: string
+  content: string
+  market_ids: string[]
+  position_type: 'new_entry' | 'exit' | 'hold' | 'analysis'
+  outcomes_shared: { market_id: string; side: 'YES' | 'NO'; shares: number; entry_price: number; current_price: number; pnl: number }[]
+  is_free_preview: boolean
+  likes: number
+  comments_count: number
+  created_at: string
+}
+
+export interface PlaybookSubscription {
+  id: string
+  user_id: string
+  playbook_id: string
+  status: 'active' | 'cancelled' | 'expired'
+  price_at_subscribe: number
+  current_price: number
+  started_at: string
+  expires_at: string
+  auto_renew: boolean
+}
+
+export interface PlaybookCreator {
+  id: string
+  username: string
+  avatar: string
+  badge?: 'whale' | 'sharp' | 'rising' | 'verified'
+  bio: string
+  total_playbooks: number
+  total_subscribers: number
+  total_earnings: number
+  win_rate: number
+  avg_return: number
+  verified_at: string | null
+  specialties: Category[]
+}
+
+// --- Market-as-a-Service (MaaS) types ---
+
+export type MaaSClientStatus = 'active' | 'trial' | 'suspended' | 'cancelled'
+export type MaaSPricingModel = 'revenue_share' | 'flat_fee' | 'hybrid'
+
+export interface MaaSClient {
+  id: string
+  company_name: string
+  website: string
+  contact_email: string
+  contact_name: string
+  status: MaaSClientStatus
+  pricing_model: MaaSPricingModel
+  monthly_fee: number
+  revenue_share_pct: number
+  embed_domains: string[]
+  allowed_categories: string[]
+  custom_branding: {
+    primary_color: string
+    logo_url: string | null
+    font_family: string | null
+    hide_predictly_branding: boolean
+  }
+  api_key: string
+  total_embeds: number
+  total_views: number
+  total_trades_from_embed: number
+  total_revenue_generated: number
+  trial_ends_at: string | null
+  created_at: string
+}
+
+export interface MaaSWidget {
+  id: string
+  client_id: string
+  name: string
+  type: 'full_market' | 'mini_card' | 'probability_bar' | 'leaderboard' | 'ticker' | 'multi_market'
+  market_ids: string[]
+  category?: string
+  config: {
+    width: string
+    height: string
+    theme: 'light' | 'dark' | 'auto'
+    show_volume: boolean
+    show_traders: boolean
+    show_timer: boolean
+    show_sparkline: boolean
+    cta_text: string
+    cta_url: string
+    border_radius: string
+    hide_powered_by: boolean
+  }
+  embed_code: string
+  views: number
+  clicks: number
+  ctr: number
+  created_at: string
+}
+
+export interface MaaSCategory {
+  id: string
+  name: string
+  slug: string
+  emoji: string
+  market_count: number
+  description: string
+  is_premium: boolean
+  monthly_addon_price: number
+}
+
+export interface MaaSAnalytics {
+  client_id: string
+  total_views_7d: number
+  total_clicks_7d: number
+  total_trades_7d: number
+  total_revenue_7d: number
+  views_by_day: { date: string; views: number; clicks: number; trades: number }[]
+  top_widgets: { widget_id: string; widget_name: string; views: number; ctr: number }[]
+  revenue_breakdown: { source: string; amount: number }[]
+}
+
+// --- Wisdom Feed API types ---
+
+export type WisdomFeedTier = 'tier1' | 'tier2' | 'tier3'
+
+export interface WisdomFeedClient {
+  id: string
+  company_name: string
+  contact_email: string
+  contact_name: string
+  tier: WisdomFeedTier
+  api_key: string
+  api_key_hash: string
+  status: 'active' | 'suspended' | 'cancelled'
+  monthly_price: number
+  rate_limit_per_min: number
+  total_requests: number
+  last_request_at: string | null
+  webhook_url: string | null
+  webhook_events: string[]
+  allowed_categories: string[]
+  created_at: string
+  expires_at: string | null
+}
+
+export interface WisdomFeedLog {
+  id: string
+  client_id: string
+  client_name: string
+  endpoint: string
+  method: string
+  status_code: number
+  response_time_ms: number
+  request_size_bytes: number
+  response_size_bytes: number
+  ip_address: string
+  user_agent: string
+  error_message: string | null
+  created_at: string
+}
+
+export interface WisdomFeedUsageStats {
+  client_id: string
+  total_requests_today: number
+  total_requests_month: number
+  avg_response_time_ms: number
+  error_rate: number
+  top_endpoints: { endpoint: string; count: number }[]
+  daily_requests: { date: string; count: number }[]
+}
+
+export interface WisdomFeedPricingTier {
+  id: WisdomFeedTier
+  name: string
+  price: number
+  description: string
+  features: string[]
+  rate_limit: number
+  data_delay: string
+  included_endpoints: string[]
+}
