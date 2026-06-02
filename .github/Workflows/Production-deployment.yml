@@ -13,17 +13,25 @@ jobs:
     - name: Checkout Code Repository
       uses: actions/checkout@v4
 
-    - name: Initialize Node.js Environment
-      uses: actions/setup-node@v4
+    - name: Initialize Bun Environment
+      uses: oven-sh/setup-bun@v2
       with:
-        node-version: 20
-        cache: 'npm'
+        bun-version: latest
 
-    - name: Install Enterprise Dependencies
-      run: npm ci
+    - name: Install Dependencies
+      run: bun install
 
-    - name: Build Next.js Target Matrix
-      run: npm run build
+    - name: Generate Prisma Client
+      run: bunx prisma generate
       env:
+        DATABASE_URL: file:./ci.db
+
+    - name: Build Next.js Application
+      run: bun run build
+      env:
+        DATABASE_URL: file:./ci.db
+        NEXT_PUBLIC_APP_URL: https://predictly-core.vercel.app
         NEXT_PUBLIC_SUPABASE_URL: https://mockproject.supabase.co
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: mock_anon_key_for_ci_build
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        NEXTAUTH_URL: http://localhost:3000
